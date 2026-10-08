@@ -161,25 +161,42 @@
 
                     <div class="form-group"></div> <!-- Espaçador -->
 
-                    <h4 class="form-section-title">Abrangência</h4>
+                    <h4 class="form-section-title">Abrangência e Produtos</h4>
 
-                    <div class="form-group">
-                        <label>Categoria/Segmento *</label>
-                        <select id="promo-segmento" required>
-                            <option value="sorvete">Sorvete</option>
-                            <option value="Refrescar">Refrescar</option>
-                            <option value="Energizar">Energizar</option>
-                            <option value="Aquecer">Aquecer</option>
-                            <option value="Saciar">Saciar</option>
-                        </select>
-                    </div>
+                  <div class="form-group">
+    <label>Categoria principal (Apenas se não escolher produtos) *</label>
+    <select id="promo-segmento" required>
+        <option value="geral">Geral / Todos os Produtos</option> <!-- Nova opção -->
+        <option value="sorvete">Sorvete</option>
+        <option value="Refrescar">Refrescar</option>
+        <option value="Energizar">Energizar</option>
+        <option value="Aquecer">Aquecer</option>
+        <option value="Saciar">Saciar</option>
+    </select>
+</div>
 
                     <div class="form-group full-width">
-                        <label>Produtos Específicos (Opcional)</label>
-                        <input type="text" id="promo-produtos-selecionados" placeholder="Ex: Picolé de Uva, Sorvete de Flocos (Separe por vírgula)">
+                        <label>Selecione os Produtos da Promoção</label>
+                        
+                        <!-- Barra de filtros para facilitar a busca por linha e categoria -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                            <select id="filtro-cat-modal" onchange="filtrarProdutosModal()" style="flex: 1;">
+                                <option value="">Todas as Categorias</option>
+                            </select>
+                            <select id="filtro-linha-modal" onchange="filtrarProdutosModal()" style="flex: 1;">
+                                <option value="">Todas as Linhas</option>
+                            </select>
+                            <button type="button" class="btn btn-outline" onclick="selecionarVisiveis()" style="padding: 10px;">Marcar Visíveis</button>
+                            <button type="button" class="btn btn-outline" onclick="desmarcarTodos()" style="padding: 10px;">Desmarcar Todos</button>
+                        </div>
+
+                        <!-- Lista Dinâmica de Checkboxes -->
+                        <div id="lista-produtos-checkbox" style="max-height: 200px; overflow-y: auto; background: var(--bg-pesquisa); border: 1px solid var(--border-divisoria); border-radius: 6px; padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                            <span style="color: var(--text-secundario);">Carregando produtos...</span>
+                        </div>
                     </div>
 
-                </div>
+                </div> <!-- Fecha o form-grid -->
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
