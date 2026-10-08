@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/x-icon" href="assets/icons/icone.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promoções - T-PACE</title>
+    
+    <style>
+        .form-section-title {
+            grid-column: span 3;
+            margin-top: 20px;
+            border-bottom: 1px solid var(--border-divisoria);
+            padding-bottom: 5px;
+            color: var(--text-secundario);
+            font-size: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        @media screen and (max-width: 768px) {
+            .form-section-title {
+                grid-column: span 1;
+            }
+        }
+    </style>
+    
+    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- TOPBAR COM NAVEGAÇÃO -->
+    <header class="topbar">
+        <!-- Logo -->
+        <div class="topbar-brand">T-PACE</div>
+        
+        <!-- Botão Hamburger -->
+        <button class="mobile-menu-btn">
+            <span></span><span></span><span></span>
+        </button>
+
+        <!-- Menu Principal -->
+        <nav class="topbar-menu">
+            <a href="dashboard.html" class="menu-link" title="Dashboard">
+                <img src="assets/icons/dashboard.png" alt="Dashboard" class="nav-icon">
+            </a>
+            <a href="relatorios.html" class="menu-link" title="Relatórios">
+                <img src="assets/icons/relatorio.png" alt="Relatórios" class="nav-icon">
+            </a>
+            <a href="usuarios.html" class="menu-link" title="Usuários">
+                <img src="assets/icons/usuario.png" alt="Usuários" class="nav-icon">
+            </a>
+            <a href="estoque.html" class="menu-link" title="Controle de Estoque">
+                <img src="assets/icons/estoque.png" alt="Estoque" class="nav-icon">
+            </a>
+           <a href="promocoes.html" class="menu-link" title="Promoções">
+                <img src="assets/icons/promo.png" alt="Promoções" class="nav-icon">
+            </a>
+            <a href="index.html" id="btn-sair" class="menu-link" title="Sair">
+                <img src="assets/icons/sair.png" alt="Sair" class="nav-icon">
+            </a>
+        </nav>
+
+        <div class="topbar-divider"></div>
+        
+        <!-- Usuário -->
+        <div class="user-info">
+            <span id="nome-usuario-logado">Carregando...</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- CONTEÚDO DA TELA: PROMOÇÕES -->
+        <section class="screen-container">
+            <h2>Gerenciar Promoções</h2>
+            
+            <!-- TOOLBAR COM BOTÕES -->
+            <div class="toolbar">
+                <input type="text" id="inputPesquisa" placeholder="Pesquisar campanha..." style="width: 300px;">
+                <div>
+                    <button class="btn" onclick="abrirModalNovo()">+ Nova Promoção</button>
+                </div>
+            </div>
+
+            <!-- ESTRUTURA DA TABELA -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campanha</th>
+                            <th class="col-desktop">Segmento</th>
+                            <th class="col-desktop">Desconto</th>
+                            <th class="col-desktop">Expira em</th>
+                            <th class="col-desktop">Status</th>
+                            <th class="col-desktop">Ações</th>
+                            <th class="col-mobile-seta"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-promocoes">
+                        <!-- O JS injeta aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="threeeo-footer">
+                <p>Desenvolvido por <a href="https://threeeo.com.br" target="_blank">Threeeo</a></p>
+            </footer>
+        </section>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- JANELA MODAL OCULTA (ADICIONAR/EDITAR)     -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="modal-promocao">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3 id="modal-titulo">Nova Promoção</h3>
+                <button class="modal-close" onclick="fecharModal()">&times;</button>
+            </div>
+            
+            <form id="form-promocao">
+                <input type="hidden" id="promo-id">
+                
+                <div class="form-grid">
+                    <!-- Imagem / Banner da Promoção -->
+                    <div class="form-group full-width" style="text-align: center; margin-bottom: 10px;">
+                        <label>Banner ou Foto da Promoção</label>
+                        <div style="margin: 10px auto; width: 100%; max-width: 300px; height: 140px; border-radius: 12px; border: 2px dashed var(--btn-acao); display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background: var(--bg-pesquisa);" onclick="document.getElementById('promo-imagem').click()">
+                            <img id="preview-imagem" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                            <i class="fas fa-image" id="icone-imagem" style="font-size: 35px; color: var(--text-secundario); opacity: 0.5;"></i>
+                        </div>
+                        <input type="file" id="promo-imagem" accept="image/*" style="display: none;" onchange="previewImagem(event)">
+                        <input type="hidden" id="promo-imagem-url">
+                    </div>
+
+                    <h4 class="form-section-title">Dados da Campanha</h4>
+                    
+                    <div class="form-group full-width">
+                        <label>Nome da Campanha *</label>
+                        <input type="text" id="promo-nome" placeholder="Ex: Especial de Verão" required>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Descrição</label>
+                        <textarea id="promo-descricao" rows="2" placeholder="Ex: Aproveite nossos sabores refrescantes com desconto!" style="width: 100%; border-radius: 4px; border: 1px solid var(--border-divisoria); background: var(--bg-pesquisa); color: var(--text-escuro); padding: 10px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Desconto Máximo</label>
+                        <input type="text" id="promo-desconto" placeholder="Ex: 20% OFF ou R$ 5,00">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data Final (Expiração) *</label>
+                        <!-- Usando datetime-local para ter data e hora e o cronômetro do site funcionar preciso -->
+                        <input type="datetime-local" id="promo-data-final" required>
+                    </div>
+
+                    <div class="form-group"></div> <!-- Espaçador -->
+
+                    <h4 class="form-section-title">Abrangência</h4>
+
+                    <div class="form-group">
+                        <label>Categoria/Segmento *</label>
+                        <select id="promo-segmento" required>
+                            <option value="sorvete">Sorvete</option>
+                            <option value="Refrescar">Refrescar</option>
+                            <option value="Energizar">Energizar</option>
+                            <option value="Aquecer">Aquecer</option>
+                            <option value="Saciar">Saciar</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Produtos Específicos (Opcional)</label>
+                        <input type="text" id="promo-produtos-selecionados" placeholder="Ex: Picolé de Uva, Sorvete de Flocos (Separe por vírgula)">
+                    </div>
+
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn" id="btn-salvar">Salvar Promoção</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/promocoes.js"></script>
+</body>
+</html>
