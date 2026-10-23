@@ -6,56 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - T-PACE</title>
     <link rel="stylesheet" href="css/style.css?v=3">
-    <!-- Importando a biblioteca Chart.js para os gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Apenas classes auxiliares para as abas que não estão no style.css base */
         .tab-content { display: none; animation: fadeIn 0.4s ease-in-out; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        /* CORREÇÕES RESPONSIVAS EXCLUSIVAS PARA OS RELATÓRIOS */
-        /* CORREÇÕES RESPONSIVAS EXCLUSIVAS PARA OS RELATÓRIOS */
-        /* CORREÇÕES RESPONSIVAS EXCLUSIVAS PARA OS RELATÓRIOS */
         @media screen and (max-width: 768px) {
             /* 1. Devolve a rolagem horizontal e aumenta o espaço geral entre campos */
             .table-wrapper {
-                overflow-x: auto !important; /* Habilita deslizar para os lados */
+                overflow-x: auto !important;
             }
             table {
                 table-layout: auto !important; 
-                min-width: 850px !important; /* Ideal para a tabela principal (Desempenho) */
+                min-width: 850px !important;
             }
             th, td {
-                white-space: nowrap !important; /* Impede que o texto quebre */
-                padding: 12px 15px !important; /* Aumenta o espaço em branco entre as células */
+                white-space: nowrap !important;
+                padding: 12px 15px !important;
             }
             
-            /* EXCEÇÃO: Ajustes para a Aba Radar de Ação */
             #aba-radar table {
-                min-width: 500px !important; /* Como tem 3 colunas, não precisa de 850px */
+                min-width: 500px !important;
             }
             #aba-radar th:nth-child(2), #aba-radar td:nth-child(2) {
-                width: 1%; /* Puxa "Quantidade" para perto do limite do texto */
+                width: 1%;
                 padding-right: 15px !important;
             }
             #aba-radar th:nth-child(3), #aba-radar td:nth-child(3) {
-                width: 1%; /* Gruda a "Ação Sugerida" logo em seguida */
+                width: 1%;
             }
 
-            /* EXCEÇÃO: Ajustes para a Aba Giro de Estoque */
             #aba-giro table {
-                min-width: 650px !important; /* Ajuste moderado para 5 colunas */
+                min-width: 650px !important;
             }
             #aba-giro th:nth-child(1), #aba-giro td:nth-child(1) {
-                width: 1%; /* Encolhe a coluna "Unidade" */
+                width: 1%;
                 padding-right: 10px !important;
             }
             #aba-giro th:nth-child(2), #aba-giro td:nth-child(2) {
-                padding-left: 0 !important; /* Aproxima o "Produto" da "Unidade" */
+                padding-left: 0 !important; 
             }
             #aba-giro th:nth-child(3), #aba-giro td:nth-child(3) {
-                width: 1%; /* Puxa o "Volume (mês)" para perto do "Produto" */
+                width: 1%; 
             }
 
             /* 2. Ajusta os botões das abas do menu para não ficarem minúsculos */
@@ -78,13 +71,12 @@
                 width: 100% !important; 
             }
         }
-        /* --- VISUAL PREMIUM DAS ABAS --- */
+
         .tab-button {
-            border-radius: 12px; /* Deixa as abas mais arredondadas e modernas */
+            border-radius: 12px; 
             transition: all 0.3s ease;
         }
         
-        /* Como ficam as abas que NÃO estão selecionadas no fundo escuro */
         .tab-button.btn-outline {
             background-color: rgba(255, 255, 255, 0.05) !important;
             color: var(--text-claro) !important;
@@ -108,14 +100,13 @@
     <header class="topbar">
         <!-- Logo -->
         <div class="topbar-brand">T-PACE</div>
-        <!-- ... resto do seu código continua normal abaixo ... -->
         
         <!-- Botão Hamburger -->
         <button class="mobile-menu-btn">
             <span></span><span></span><span></span>
         </button>
 
-        <!-- Menu Principal (Fica oculto no celular até clicar) -->
+        <!-- Menu Principal -->
         <nav class="topbar-menu">
             <a href="dashboard.html" class="menu-link" title="Dashboard">
                 <img src="assets/icons/dashboard.png" alt="Dashboard" class="nav-icon">
@@ -144,7 +135,7 @@
         <section class="screen-container">
             <h2>Painel de Relatórios</h2>
 
-            <!-- MENU DE ABAS (Usando os botões do seu CSS) -->
+            <!-- MENU DE ABAS -->
             <div class="tab-menu">
                 <button class="btn tab-button" onclick="abrirAba(event, 'aba-desempenho')">Desempenho Financeiro</button>
                 <button class="btn btn-outline tab-button" onclick="abrirAba(event, 'aba-giro')">Giro de Estoque</button>
@@ -154,7 +145,6 @@
             <!-- ABA 1: DESEMPENHO E VENDAS DETALHADAS -->
             <div id="aba-desempenho" class="tab-content active">
                 
-                <!-- Toolbar estilo Estoque para o Filtro -->
                 <div class="toolbar" style="justify-content: flex-start; gap: 15px; align-items: center; flex-wrap: wrap;">
                     <label style="font-weight: bold; color: var(--text-secundario);">Período:</label>
                     <input type="date" id="filtro-inicio">
@@ -162,7 +152,6 @@
                     <input type="date" id="filtro-fim">
                     <button class="btn" onclick="carregarRelatorioDesempenho()">Atualizar</button>
                     
-                    <!-- NOVO CAMPO: Busca por ID -->
                     <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
                         <label style="font-weight: bold; color: var(--text-secundario);">Buscar Venda (ID):</label>
                         <input type="number" id="filtro-id-venda" placeholder="Ex: 123" style="width: 150px;">
@@ -239,29 +228,23 @@
         </section>
     </main>
 
-    <!-- Importa o do Lógica em JS -->
     <script src="js/relatorios.js"></script>
     <script src="js/permissoes.js"></script>
     
     <script>
-        // Função de controle das abas
         function abrirAba(evento, idAba) {
-            // 1. Oculta todos os conteúdos das abas
             let conteudos = document.getElementsByClassName("tab-content");
             for (let i = 0; i < conteudos.length; i++) {
                 conteudos[i].classList.remove("active");
             }
-            
-            // 2. Reseta todos os botões: apenas adiciona a transparência, SEM remover a base
+
             let botoes = document.getElementsByClassName("tab-button");
             for (let i = 0; i < botoes.length; i++) {
                 botoes[i].classList.add("btn-outline");
             }
-            
-            // 3. Mostra a aba desejada
+
             document.getElementById(idAba).classList.add("active");
-            
-            // 4. Preenche o botão clicado (removendo a transparência)
+
             evento.currentTarget.classList.remove("btn-outline");
         }
     </script>

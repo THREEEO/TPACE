@@ -18,14 +18,13 @@
     <header class="topbar">
         <!-- Logo -->
         <div class="topbar-brand">T-PACE</div>
-        <!-- ... resto do seu código continua normal abaixo ... -->
         
         <!-- Botão Hamburger -->
         <button class="mobile-menu-btn">
             <span></span><span></span><span></span>
         </button>
 
-        <!-- Menu Principal (Fica oculto no celular até clicar) -->
+        <!-- Menu Principal -->
         <nav class="topbar-menu">
             <a href="dashboard.html" class="menu-link" title="Dashboard">
                 <img src="assets/icons/dashboard.png" alt="Dashboard" class="nav-icon">
@@ -66,8 +65,6 @@
                 </div>
             </div>
 
-            <!-- ESTRUTURA DA TABELA -->
-            <!-- ESTRUTURA DA TABELA -->
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -83,7 +80,6 @@
                         </tr>
                     </thead>
                     <tbody id="tabela-estoque">
-                        <!-- O JS injeta aqui -->
                     </tbody>
                 </table>
             </div>
@@ -128,7 +124,6 @@
             </div>
             
             <!-- Linha 2 -->
-            <!-- AQUI ESTÁ O TRUQUE: O campo de código original fica isolado para sumir no cadastro novo -->
             <div class="form-group" id="container-codigo-barras">
                 <label>Código de Barras</label>
                 <input type="text" id="prod-codigo">
@@ -213,7 +208,6 @@
     <div id="passo-2" style="display: none;">
         <div class="form-group full-width">
             <label>Inserir Códigos de Barras</label>
-            <!-- Layout em coluna: Input em cima, Botões em baixo lado a lado -->
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <input type="text" id="input-bipar" placeholder="Insira o código e pressione Enter..." style="width: 100%;">
                 
@@ -235,7 +229,6 @@
         </div>
         
         <div id="lista-codigos" style="margin-top: 15px; max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;">
-            <!-- Os códigos bipados aparecerão aqui -->
         </div>
         
         <div class="modal-actions" style="margin-top: 25px;">
