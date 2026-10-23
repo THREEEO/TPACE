@@ -1,9 +1,8 @@
 const URL_BASE = 'https://tpace-api.whyguiih.workers.dev';
-let graficoChart = null; // Variável global para armazenar o gráfico
-let listaVendasGlobal = []; // NOVA variável para armazenar as vendas na memória
+let graficoChart = null;
+let listaVendasGlobal = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Configurar datas padrão (Últimos 30 dias até hoje)
     const hoje = new Date();
     const trintaDias = new Date(hoje);
     trintaDias.setDate(hoje.getDate() - 30);
@@ -14,12 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
     inputInicio.value = trintaDias.toISOString().split('T')[0];
     inputFim.value = hoje.toISOString().split('T')[0];
 
-    // 2. Disparar carregamento inicial
     carregarRelatorioDesempenho();
     carregarGiro();
     carregarRadar();
 
-    // 3. Lógica de busca por ID
     const inputFiltroId = document.getElementById('filtro-id-venda');
     if (inputFiltroId) {
         inputFiltroId.addEventListener('input', (evento) => {
@@ -40,9 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// ==========================================
-// FORMATAÇÕES AUXILIARES
-// ==========================================
 function formatarMoeda(valor) {
     return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -62,22 +56,16 @@ function formatarData(dataString, comHora = false) {
     return `${dia}/${mes}/${ano}`;
 }
 
-// ==========================================
-// REQUISIÇÕES E RENDERIZAÇÃO DAS TABELAS
-// ==========================================
-
 async function carregarRelatorioDesempenho() {
     const inicio = document.getElementById('filtro-inicio').value;
     const fim = document.getElementById('filtro-fim').value;
     
-    // Atualiza texto visual
     document.getElementById('texto-periodo').innerText = `Período exibido: ${formatarData(inicio)} até ${formatarData(fim)}`;
     
     try {
         const res = await fetch(`${URL_BASE}/relatorios/desempenho?inicio=${inicio}&fim=${fim}`);
         const dados = await res.json();
         
-        // SALVA os detalhes na variável global antes de renderizar
         listaVendasGlobal = dados.detalhes;
         
         renderizarTabelaDesempenho(listaVendasGlobal);
@@ -98,10 +86,9 @@ function renderizarTabelaDesempenho(detalhes) {
     }
 
     detalhes.forEach(det => {
-        // Substitui o " | " que vem do banco por quebra de linha visual com bolinhas
         const produtosHtml = '• ' + (det.produtos_comprados || '').split(' | ').join('<br>• ');
         
-        const numeroCupom = det.id_cupom; // Puxa diretamente o cupom do banco
+        const numeroCupom = det.id_cupom;
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -119,23 +106,20 @@ function renderizarTabelaDesempenho(detalhes) {
 function renderizarGrafico(dadosGrafico) {
     const ctx = document.getElementById('meuGrafico').getContext('2d');
     
-    // Destrói o gráfico antigo se o usuário estiver atualizando o filtro
     if (graficoChart) {
         graficoChart.destroy();
     }
 
     const labels = dadosGrafico.map(g => {
-        const partes = g.data_venda.split('-'); // 2026-08-25
-        return `${partes[2]}/${partes[1]}`;     // 25/08
+        const partes = g.data_venda.split('-');
+        return `${partes[2]}/${partes[1]}`;
     });
     
     const valores = dadosGrafico.map(g => g.faturamento_diario);
     
-    // Calcula Total
     const total = valores.reduce((acc, curr) => acc + curr, 0);
     document.getElementById('total-faturamento').innerText = `Total: ${formatarMoeda(total)}`;
 
-    // Cores baseadas na sua paleta CSS
     const corLinha = getComputedStyle(document.documentElement).getPropertyValue('--btn-acao').trim() || '#A45FCE';
     const corFundo = `${corLinha}33`; 
 
@@ -163,10 +147,6 @@ function renderizarGrafico(dadosGrafico) {
         }
     });
 }
-
-// ------------------------------------------
-// OUTRAS ABAS (GIRO E RADAR)
-// ------------------------------------------
 
 async function carregarGiro() {
     try {
@@ -219,4 +199,3 @@ async function carregarRadar() {
         });
     } catch (e) {}
 }
-

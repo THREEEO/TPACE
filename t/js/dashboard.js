@@ -1,11 +1,7 @@
-// ATENÇÃO: Verifique se essa URL base é a mesma do seu Worker!
 const urlAPIBase = "https://tpace-api.whyguiih.workers.dev/api/web";
 
 document.addEventListener("DOMContentLoaded", async function() {
     
-    // ==========================================
-    // 1. CARREGAR OS CARDS DO TOPO
-    // ==========================================
     const cardVendas = document.getElementById('card-vendas');
     const cardAtendimentos = document.getElementById('card-atendimentos');
     const cardAlertas = document.getElementById('card-alertas');
@@ -27,16 +23,12 @@ document.addEventListener("DOMContentLoaded", async function() {
         cardAlertas.innerText = "Erro";
     }
 
-    // ==========================================
-    // 2. LÓGICA DO GRÁFICO DINÂMICO (CHART.JS)
-    // ==========================================
     let meuGraficoInstancia = null; 
     let dadosGraficos = null;       
 
     const ctx = document.getElementById('meuGrafico').getContext('2d');
     const selector = document.getElementById('chart-selector');
 
-    // Suas cores oficiais para os gráficos
     const cores = {
         roxo: '#A45FCE',
         turquesa: '#68BBBA',
@@ -90,7 +82,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             config = {
                 type: 'bar',
                 data: {
-                    // Corta o nome se for maior que 20 caracteres (agora temos mais espaço!)
                     labels: dados.map(d => d.nome.length > 20 ? d.nome.substring(0, 20) + '...' : d.nome),
                     datasets: [{
                         label: 'Unidades Vendidas',
@@ -100,9 +91,9 @@ document.addEventListener("DOMContentLoaded", async function() {
                     }]
                 },
                 options: { 
-                    indexAxis: 'y', // A MÁGICA: Deita as barras para o celular!
+                    indexAxis: 'y', 
                     plugins: {
-                        legend: { display: false } // Esconde a legenda extra pra deixar mais limpo
+                        legend: { display: false }
                     }
                 }
             };
@@ -112,7 +103,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             config = {
                 type: 'bar',
                 data: {
-                    // Mesmo truque para as filiais
                     labels: dados.map(d => d.nome.length > 15 ? d.nome.substring(0, 25) + '...' : d.nome),
                     datasets: [{
                         label: 'Faturamento (R$)',
@@ -141,13 +131,12 @@ document.addEventListener("DOMContentLoaded", async function() {
         try {
             const resposta = await fetch(`${urlAPIBase}/graficos`);
             dadosGraficos = await resposta.json();
-            renderizarGrafico('faturamento'); // Começa mostrando o faturamento
+            renderizarGrafico('faturamento');
         } catch (erro) {
             console.error("Erro ao puxar dados dos gráficos:", erro);
         }
     }
 
-    // Refaz o gráfico se o usuário mudar a opção no menu
     selector.addEventListener('change', function(e) {
         if(dadosGraficos) {
             renderizarGrafico(e.target.value);

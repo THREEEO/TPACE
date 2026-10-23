@@ -31,9 +31,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// ==========================================
-// TRANSIÇÕES DE PASSOS E LISTA
-// ==========================================
 window.irParaPasso2 = function() {
     const form = document.getElementById('form-produto');
     if (!form.reportValidity()) return; 
@@ -86,9 +83,6 @@ function gerarCodigoGeral() {
     return codigo;
 }
 
-// ==========================================
-// 1. CARREGAR E RENDERIZAR TABELA (AGRUPADA)
-// ==========================================
 async function carregarProdutos() {
     const tbody = document.getElementById('tabela-estoque');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Carregando produtos...</td></tr>';
@@ -101,15 +95,11 @@ async function carregarProdutos() {
     }
 }
 
-// ==========================================
-// 2. CONTROLE DO MODAL 
-// ==========================================
 window.abrirModalNovo = function() {
     document.getElementById('modal-titulo').innerText = "Adicionar Produto";
     document.getElementById('form-produto').reset();
     document.getElementById('prod-id').value = "";
     
-    // GERA O CÓDIGO GERAL PARA O NOVO LOTE
     document.getElementById('prod-codigo-geral').value = gerarCodigoGeral();
     
     document.getElementById('container-codigo-barras').style.display = 'none';
@@ -129,20 +119,16 @@ window.abrirModalNovo = function() {
     document.getElementById('modal-produto').classList.add('active');
 };
 
-// Agora a função recebe a CHAVE do grupo em vez de um único ID
 window.abrirModalEditar = function(chave_grupo) {
-    // Filtra todos os itens que pertencem a este grupo (mesmo codigo_geral ou mesmo id se for solto)
     const itensDoGrupo = listaProdutos.filter(p => {
         const c = p.codigo_geral ? `geral_${p.codigo_geral}` : `id_${p.id}`;
         return c === chave_grupo;
     });
     
     if (itensDoGrupo.length === 0) return;
-    const produtoBase = itensDoGrupo[0]; // Usamos o primeiro item como base para preencher o formulário
     
     document.getElementById('modal-titulo').innerText = "Editar Produto";
     
-    // Se tiver mais de 1 item no grupo, escondemos o input de código de barras para não sobrescrever
     if (itensDoGrupo.length > 1) {
         document.getElementById('container-codigo-barras').style.display = 'none';
     } else {
@@ -153,7 +139,6 @@ window.abrirModalEditar = function(chave_grupo) {
     document.getElementById('btn-salvar-edicao').style.display = 'inline-block';
     voltarPasso1(); 
     
-    // Salvamos a lista de IDs como um Array (texto JSON) no input oculto
     document.getElementById('prod-id').value = JSON.stringify(itensDoGrupo.map(i => i.id));
     
     document.getElementById('prod-codigo-geral').value = produtoBase.codigo_geral || "";
@@ -174,17 +159,14 @@ document.getElementById('prod-lote').value = produtoBase.lote || "";
         
         document.getElementById('prod-imagem-url').value = produtoBase.foto || "";
         
-        // CORREÇÃO: Limpa o input de arquivo físico para não reenviar fotos antigas!
         document.getElementById('prod-imagem').value = ""; 
         
         if (produtoBase.foto) {
             const imgPreview = document.getElementById('preview-imagem');
             
-            // Corrige os links antigos do banco em tempo real para exibir a foto
             let fotoCorrigida = produtoBase.foto.replace("pub-https://", "https://pub-").replace(".r2.cloudflarestorage.com/tpace.r2.dev/", ".r2.dev/");
             imgPreview.src = fotoCorrigida;
             
-            // Se a imagem falhar ao carregar, esconde a moldura quebrada e mostra o ícone da câmera
             imgPreview.onerror = function() {
                 this.style.display = "none";
                 document.getElementById('icone-imagem').style.display = "block";
@@ -205,7 +187,6 @@ window.fecharModal = function() {
         document.getElementById('modal-produto').classList.remove('active');
         if (typeof fecharCamera === 'function') fecharCamera();
         
-        // CORREÇÃO: Zera completamente o formulário e a memória da imagem ao fechar
         document.getElementById('form-produto').reset();
         document.getElementById('prod-imagem').value = "";
         document.getElementById('prod-imagem-url').value = "";
@@ -216,9 +197,6 @@ window.fecharModal = function() {
         document.getElementById('icone-imagem').style.display = "block";
     };
 
-// ==========================================
-// 3. SALVAR (CRIAÇÃO OU ATUALIZAÇÃO EM LOTE)
-// ==========================================
 async function salvarProduto(event) {
     event.preventDefault();
     const btn = event.submitter;
@@ -230,7 +208,6 @@ async function salvarProduto(event) {
             let imagemUrl = document.getElementById('prod-imagem-url').value;
             const fileInput = document.getElementById('prod-imagem');
             
-            // --- UPLOAD DA FOTO (COM REDIMENSIONAMENTO BLINDADO) ---
             if (fileInput.files.length > 0) {
                 btn.innerText = "Preparando Foto...";
                 
@@ -239,9 +216,6 @@ async function salvarProduto(event) {
 
                 btn.innerText = "Enviando Imagem...";
                 const formData = new FormData();
-                
-                // O SEGREDO DE OURO: Usar o 3º parâmetro do append!
-                // Isso obriga o navegador a enviar como um arquivo legítimo com nome e extensão
                 const nomeSeguro = arquivoOriginal.name.replace(/\.[^/.]+$/, "") + ".jpg";
                 formData.append('file', fotoBlob, nomeSeguro);
                 
@@ -251,7 +225,6 @@ async function salvarProduto(event) {
                 if (dataUpload.sucesso && dataUpload.url) {
                     imagemUrl = dataUpload.url;
                 } else {
-                    // MÁGICA: Agora junta a mensagem de erro genérica com a explicação técnica exata do Cloudflare
                     const motivoExato = dataUpload.detalhe ? ` | Motivo técnico: ${dataUpload.detalhe}` : "";
                     throw new Error((dataUpload.erro || "Falha no upload da imagem.") + motivoExato);
                 }
@@ -283,10 +256,8 @@ async function salvarProduto(event) {
         };
 
         if (isNovo) {
-            // == MODO LOTE NOVO ==
             if (codigosBipados.length === 0) codigosBipados.push(""); 
             
-            // Promise.all executa todos os envios juntos de uma vez, muito mais rápido!
             const promessas = codigosBipados.map(codigo => {
                 const dadosLote = { ...dadosBase, codigo_barras: parseText(codigo) };
                 return fetch(urlAPIProdutos, {
@@ -298,16 +269,13 @@ async function salvarProduto(event) {
             await Promise.all(promessas);
 
         } else {
-            // == MODO EDIÇÃO (ÚNICO OU LOTE) ==
-            const idsArray = JSON.parse(idValue); // Transforma o texto de volta num array de IDs
+            const idsArray = JSON.parse(idValue);
             
-            // NOVO: Lê o que o usuário digitou no campo de código de barras
             const codigoEditado = parseText(document.getElementById('prod-codigo').value);
             
             const promessas = idsArray.map(id => {
                 const original = listaProdutos.find(p => p.id === id);
                 
-                // NOVO: Se for um produto único, salva o código editado. Se for lote, protege e mantém o original.
                 const codigoFinal = (idsArray.length === 1) ? codigoEditado : (original ? original.codigo_barras : null);
                 
                 const dadosAtualizados = { 
@@ -335,20 +303,15 @@ async function salvarProduto(event) {
     }
 }
 
-// ==========================================
-// 4. EXCLUIR PRODUTO(S) AGRUPADO(S)
-// ==========================================
 window.excluirProduto = async function(chave_grupo, nomeProduto) {
     const confirmacao = confirm(`Tem certeza que deseja excluir "${nomeProduto}"? Isso apagará todas as unidades vinculadas.`);
     if (confirmacao) {
         try {
-            // Encontra todos os IDs vinculados a essa chave
             const itens = listaProdutos.filter(p => {
                 const c = p.codigo_geral ? `geral_${p.codigo_geral}` : `id_${p.id}`;
                 return c === chave_grupo;
             });
             
-            // Deleta todos juntos
             const promessas = itens.map(item => fetch(`${urlAPIProdutos}/${item.id}`, { method: 'DELETE' }));
             await Promise.all(promessas);
             
@@ -359,27 +322,19 @@ window.excluirProduto = async function(chave_grupo, nomeProduto) {
     }
 };
 
-// ==========================================
-// MÓDULO DO LEITOR DE CÓDIGO DE BARRAS (CÂMERA)
-// ==========================================
 let html5QrCode;
 
 window.iniciarLeitorCamera = function() {
     document.getElementById('camera-container').style.display = 'block';
     
-    // Garante que o leitor foi instanciado
     if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("reader");
     }
     
-    // ==========================================
-    // CONFIGURAÇÃO TURBO PARA CELULARES
-    // ==========================================
     const config = { 
-        fps: 15, // Aumenta a fluidez do vídeo (quadros por segundo)
-        qrbox: { width: 280, height: 100 }, // Deixa a caixa achatada, ideal para códigos de barras longos
+        fps: 15,
+        qrbox: { width: 280, height: 100 }, 
         
-        // O SEGREDO: Foca a CPU APENAS nos códigos de varejo, ignorando QR Codes e afins.
         formatsToSupport: [
             Html5QrcodeSupportedFormats.EAN_13,
             Html5QrcodeSupportedFormats.EAN_8,
@@ -391,7 +346,6 @@ window.iniciarLeitorCamera = function() {
     
     html5QrCode.start({ facingMode: "environment" }, config,
         (decodedText, decodedResult) => {
-            // Sucesso!
             const inputBipar = document.getElementById('input-bipar');
             inputBipar.value = decodedText;
             
@@ -401,7 +355,6 @@ window.iniciarLeitorCamera = function() {
             fecharCamera();
         },
         (errorMessage) => {
-            // Ignora os frames vazios normais
         }
     ).catch((err) => {
         let motivo = "Verifique as permissões de câmera do navegador.";
@@ -418,18 +371,13 @@ window.iniciarLeitorCamera = function() {
 window.fecharCamera = function() {
     try {
         if (html5QrCode) {
-            // Tenta parar a câmera e limpar a memória suavemente
             html5QrCode.stop().then(() => {
                 html5QrCode.clear();
             }).catch(err => { 
-                // Ignora erros da promessa (ex: demora no encerramento)
             });
         }
     } catch (e) {
-        // MÁGICA: Captura o erro síncrono da biblioteca e ignora silenciosamente
-        // Isso evita que o erro de "câmera não iniciada" vaze para a tela de salvamento
     } finally {
-        // Independentemente de qualquer coisa, esconde a caixa preta do HTML
         const container = document.getElementById('camera-container');
         if (container) container.style.display = 'none';
     }
@@ -442,9 +390,6 @@ function ocultarBotoesSeRepositor() {
     }
 }
 
-// ==========================================
-// REDIMENSIONAMENTO DE IMAGEM CLIENT-SIDE (500x500)
-// ==========================================
 function redimensionarImagem(file, tamanhoQuadrado) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -456,7 +401,6 @@ function redimensionarImagem(file, tamanhoQuadrado) {
                 canvas.height = tamanhoQuadrado;
                 const ctx = canvas.getContext('2d');
 
-                // Pinta fundo branco para proteger PNGs transparentes
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(0, 0, tamanhoQuadrado, tamanhoQuadrado);
 
@@ -469,7 +413,6 @@ function redimensionarImagem(file, tamanhoQuadrado) {
 
                 ctx.drawImage(img, dx, dy, scaledWidth, scaledHeight);
 
-                // Converte para Blob (dados puros) em JPEG alta qualidade e DEVOLVE direto
                 canvas.toBlob((blob) => {
                     resolve(blob); 
                 }, 'image/jpeg', 0.85);
@@ -495,7 +438,6 @@ function filtrarTabela(termo) {
         if (!termo) return renderizarTabela(listaProdutos);
         
         const filtrados = listaProdutos.filter(prod => {
-            // O segredo: Converter explicitamente para String() antes do toLowerCase()
             const nome = String(prod.nome || "").toLowerCase();
             const codigo = String(prod.codigo_barras || "").toLowerCase();
             const geral = String(prod.codigo_geral || "").toLowerCase();
@@ -515,19 +457,16 @@ function renderizarTabela(produtos) {
         return;
     }
 
-    // A MÁGICA DO AGRUPAMENTO (SEM SOMAR QUANTIDADES)
     const grupos = {};
     produtos.forEach(prod => {
         const chave = prod.codigo_geral ? `geral_${prod.codigo_geral}` : `id_${prod.id}`;
         if (!grupos[chave]) {
-            // Guarda o produto como base (molde) para o grupo inteiro
             grupos[chave] = { 
                 ...prod, 
                 chave_grupo: chave,
                 ids: [prod.id]
             };
         } else {
-            // Apenas adiciona o ID novo na lista, mas mantém as informações do molde intactas
             grupos[chave].ids.push(prod.id);
         }
     });
@@ -537,7 +476,6 @@ function renderizarTabela(produtos) {
     produtosAgrupados.forEach(grupo => {
         let classeBadge = '', textoStatus = '';
         
-        // Agora pegamos a quantidade exata do molde, sem multiplicar nada!
         const qtd = parseFloat(grupo.quantidade) || 0; 
         const min = parseFloat(grupo.quantidade_minima) || 1; 
         
@@ -557,7 +495,6 @@ function renderizarTabela(produtos) {
         const precoFormatado = precoFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         let conteudoPreco = isPromocao ? `<span class="promo-badge">${precoFormatado}</span>` : precoFormatado;
 
-        // Se for lote, mostra "Múltiplos", senão mostra o código normal
         let textoCodigo = grupo.codigo_barras || 'N/A';
         if (grupo.ids.length > 1) {
             textoCodigo = `<i class="fas fa-layer-group" style="color: var(--text-secundario); margin-right: 5px;"></i>Múltiplos (${grupo.ids.length})`;
@@ -612,25 +549,20 @@ window.toggleDetalhesEstoque = function(chave) {
     }
 };
 
-// Gera um código de 5 dígitos para uso interno e adiciona na lista
 window.gerarCodigoInterno5Digitos = function() {
     let codigo = '';
     for (let i = 0; i < 5; i++) {
         codigo += Math.floor(Math.random() * 10);
     }
     
-    // 1. Verifica se já está na listinha de agora que estamos bipando
     const existeNaTela = codigosBipados.includes(codigo);
     
-    // 2. Verifica se JÁ EXISTE NO BANCO DE DADOS (olhando a lista carregada)
     const existeNoBanco = listaProdutos.some(produto => produto.codigo_barras === codigo);
 
-    // Se estiver totalmente livre de duplicidade, adiciona!
     if (!existeNaTela && !existeNoBanco) {
         codigosBipados.push(codigo);
         atualizarListaCodigos();
     } else {
-        // Se bater com a tela ou com o banco, ele "gira a roleta" de novo automaticamente!
         window.gerarCodigoInterno5Digitos();
     }
 };

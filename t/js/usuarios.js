@@ -1,15 +1,9 @@
-// ==========================================
-// CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
-// ==========================================
 const urlAPIPessoal = "https://tpace-api.whyguiih.workers.dev/api/web/funcionarios/pessoal";
 const urlAPIProfissional = "https://tpace-api.whyguiih.workers.dev/api/web/funcionarios/profissional";
 const urlAPIFuncionariosGeral = "https://tpace-api.whyguiih.workers.dev/api/web/funcionarios";
 
 let listaFuncionarios = [];
 
-// ==========================================
-// TRADUTOR DE NÚMEROS DO BANCO
-// ==========================================
 const DICIONARIOS = {
     genero: { 1: 'Masculino', 2: 'Feminino', 3: 'Outros' },
     raca: { 1: 'Branca', 2: 'Preta', 3: 'Parda', 4: 'Amarela', 5: 'Indígena' },
@@ -33,7 +27,6 @@ function traduzir(dicionario, valor) {
     return valor;
 }
 
-// Preenche inputs corretamente convertendo Boolean e Numéricos para o formato HTML
 function preencherCampo(id, valor) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -55,9 +48,6 @@ function preencherCampo(id, valor) {
     }
 }
 
-// ==========================================
-// INICIALIZAÇÃO
-// ==========================================
 document.addEventListener("DOMContentLoaded", function() {
     carregarFuncionarios();
     const form = document.getElementById('form-funcionario');
@@ -76,9 +66,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// ==========================================
-// 1. CARREGAR E MESCLAR
-// ==========================================
 async function carregarFuncionarios() {
     const tbody = document.getElementById('tabela-funcionarios');
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Carregando funcionários...</td></tr>';
@@ -107,9 +94,6 @@ async function carregarFuncionarios() {
     }
 }
 
-// ==========================================
-// 2. RENDERIZAR TABELA PRINCIPAL
-// ==========================================
 function renderizarTabela(funcionarios) {
     const tbody = document.getElementById('tabela-funcionarios');
     tbody.innerHTML = '';
@@ -123,11 +107,9 @@ function renderizarTabela(funcionarios) {
         const tipoContrato = traduzir(DICIONARIOS.tipo_contrato, func.tipo);
         const statusBadge = (func.status == 1 || func.status === 'Ativo' || func.status === true) ? '<span class="status-badge status-good">Ativo</span>' : '<span class="status-badge status-critical">Inativo</span>';
         
-        // --- 1. LINHA PRINCIPAL ---
         const trPrincipal = document.createElement('tr');
-        trPrincipal.className = "linha-produto"; // Reaproveitando o CSS do Estoque (cursor pointer)
+        trPrincipal.className = "linha-produto";
         trPrincipal.onclick = (event) => {
-            // Só abre a sanfona se não clicar no Nome (que abre outra tela) nem no botão Editar
             if (!event.target.classList.contains('clickable-name') && !event.target.classList.contains('btn-action')) {
                 toggleDetalhesUsuario(func.id);
             }
@@ -148,7 +130,6 @@ function renderizarTabela(funcionarios) {
         `;
         tbody.appendChild(trPrincipal);
 
-        // --- 2. LINHA DA SANFONA (Visível apenas no Mobile) ---
         const trDetalhes = document.createElement('tr');
         trDetalhes.id = `detalhes-user-${func.id}`;
         trDetalhes.className = 'detalhes-row';
@@ -168,9 +149,6 @@ function renderizarTabela(funcionarios) {
     });
 }
 
-// ==========================================
-// FUNÇÃO PARA ABRIR/FECHAR A SANFONA NO MOBILE
-// ==========================================
 window.toggleDetalhesUsuario = function(id) {
     const linha = document.getElementById(`detalhes-user-${id}`);
     const seta = document.getElementById(`seta-user-${id}`);
@@ -181,9 +159,6 @@ window.toggleDetalhesUsuario = function(id) {
     }
 };
 
-// ==========================================
-// 3. PREENCHER LISTA DE GESTORES
-// ==========================================
 function preencherSelectGestores(funcionarios) {
     const selectGestor = document.getElementById('f-gestor');
     if (!selectGestor) return;
@@ -191,16 +166,12 @@ function preencherSelectGestores(funcionarios) {
     selectGestor.innerHTML = '<option value="">Nenhum / Selecione</option>';
     
     funcionarios.forEach(func => {
-        // Verifica se tem nome E se o nível de senioridade é 5 (Gestão)
         if (func.nome_completo && (func.nivel_senioridade == 5 || func.nivel_senioridade === '5')) {
             selectGestor.innerHTML += `<option value="${func.id}">${func.nome_completo}</option>`;
         }
     });
 }
 
-// ==========================================
-// 4. PÁGINA DE DETALHES (SPA TRADUZIDA)
-// ==========================================
 window.abrirPaginaDetalhes = function(id) {
     const func = listaFuncionarios.find(f => f.id === id);
     if (!func) return;
@@ -271,9 +242,6 @@ window.voltarParaLista = function() {
     document.getElementById('tela-lista').style.display = 'block';
 };
 
-// ==========================================
-// 5. MODAL ADICIONAR / EDITAR
-// ==========================================
 window.abrirModalNovo = function() {
     document.getElementById('modal-titulo').innerText = "Adicionar Novo Funcionário";
     document.getElementById('form-funcionario').reset();
@@ -321,9 +289,6 @@ window.fecharModalForm = function() {
     document.getElementById('modal-funcionario').classList.remove('active');
 };
 
-// ==========================================
-// 6. SALVAR FUNCIONÁRIO (POST/PUT)
-// ==========================================
 window.salvarFuncionario = async function(event) {
     event.preventDefault(); 
 
