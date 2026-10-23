@@ -359,7 +359,6 @@ export default {
       }
     }
 
-// POST: CRIAR PRODUTO
     if (path === "/api/web/produtos" && method === "POST") {
       try {
         const body = await request.json();
@@ -385,7 +384,7 @@ export default {
           body.lote || null, 
           body.validade || null, 
           body.foto || null,
-          body.codigo_geral || null // NOVO CAMPO SALVO
+          body.codigo_geral || null
         ).run();
 
         return new Response(JSON.stringify({ sucesso: true }), { status: 201, headers: corsHeaders });
@@ -394,7 +393,6 @@ export default {
       }
     }
 
-    // PUT: ATUALIZAR PRODUTO
     if (path.startsWith("/api/web/produtos/") && method === "PUT") {
       try {
         const id = path.split('/').pop();
@@ -421,7 +419,7 @@ export default {
           body.lote || null, 
           body.validade || null, 
           body.foto || null, 
-          body.codigo_geral || null, // NOVO CAMPO ATUALIZADO
+          body.codigo_geral || null,
           id
         ).run();
 
@@ -441,38 +439,32 @@ export default {
       }
     }
 
-    // =====================================================================
-    // UPLOAD DE IMAGEM PARA O CLOUDFLARE R2
-    // =====================================================================
     if (path === "/api/web/upload" && method === "POST") {
       try {
         const formData = await request.formData();
         const file = formData.get("file");
-
+        
         if (!file) {
           return new Response(JSON.stringify({ erro: "Nenhum arquivo enviado" }), { status: 400, headers: corsHeaders });
         }
-
-        // Gera um nome único para a imagem (ex: 169123456_foto.png)
-        const nomeArquivo = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-
-        // Salva no R2 (Usando o binding BUCKET_PRODUTOS configurado no Cloudflare)
-        await env.BUCKET_PRODUTOS.put(nomeArquivo, file.stream(), {
-          httpMetadata: { contentType: file.type }
+        
+        const fileName = file.name ? file.name.replace(/\s+/g, '_') : 'imagem_padrao.jpg';
+        const nomeArquivo = `${Date.now()}_${fileName}`;
+        
+        const buffer = await file.arrayBuffer();
+        
+        await env.BUCKET_PRODUTOS.put(nomeArquivo, buffer, {
+          httpMetadata: { contentType: file.type || 'image/jpeg' }
         });
-
-        // Link corrigido apontando diretamente para o Public Access do R2
-                const urlPublica = `https://pub-cef0af4ec14641d69ab30f7d560f9387.r2.dev/${nomeArquivo}`;
-
+        
+        const urlPublica = `https://pub-cef0af4ec14641d69ab30f7d560f9387.r2.dev/${nomeArquivo}`;
+        
         return new Response(JSON.stringify({ sucesso: true, url: urlPublica }), { status: 201, headers: corsHeaders });
       } catch (error) {
         return new Response(JSON.stringify({ erro: "Erro ao salvar no R2.", detalhe: error.message }), { status: 500, headers: corsHeaders });
       }
     }
 
-   // =======================================================
-    // FUNCIONÁRIOS: GET DADOS PESSOAIS (SELECT)
-    // =======================================================
     if (method === "GET" && path === "/api/web/funcionarios/pessoal") {
       try {
         const { results } = await env.DB.prepare(
@@ -484,9 +476,6 @@ export default {
       }
     }
 
-    // =======================================================
-    // FUNCIONÁRIOS: GET DADOS PROFISSIONAIS (SELECT)
-    // =======================================================
     if (method === "GET" && path === "/api/web/funcionarios/profissional") {
       try {
         const { results } = await env.DB.prepare(
@@ -498,18 +487,13 @@ export default {
       }
     }
 
-    // =======================================================
-    // FUNCIONÁRIOS: POST (CADASTRAR NOVO COM ID MANUAL)
-    // =======================================================
     if (method === "POST" && path === "/api/web/funcionarios") {
       try {
         const body = await request.json();
 
-        // 1. GERAÇÃO MANUAL DO ID: Pega o maior ID atual e soma 1
         const maxIdResult = await env.DB.prepare("SELECT MAX(id) as maxId FROM tb_funcionarios").first();
         const novoId = (maxIdResult && maxIdResult.maxId !== null ? maxIdResult.maxId : 0) + 1;
 
-        // 2. Insere na tabela principal forçando o novoId manualmente
         const stmtFuncionario = env.DB.prepare(`
           INSERT INTO tb_funcionarios (
             id, nome_completo, data_nascimento, genero, raca, estado_civil, nacionalidade, 
@@ -526,7 +510,6 @@ export default {
           body.cidade, body.cep, body.complemento, body.status
         ).run();
 
-        // 3. Insere na tabela de complemento usando o mesmo novoId
         const stmtComplemento = env.DB.prepare(`
           INSERT INTO tb_funcionarios_complemento (
             id_funcionario, data_admissao, tipo, cargo, nivel_senioridade, 
@@ -548,16 +531,11 @@ export default {
         return new Response(JSON.stringify({ error: "POST Funcionario: " + e.message }), { status: 500, headers: corsHeaders }); 
       }
     }
-
-    // =======================================================
-    // FUNCIONÁRIOS: PUT (EDITAR EXISTENTE COM TRAVA DE SEGURANÇA)
-    // =======================================================
     if (method === "PUT" && path.startsWith("/api/web/funcionarios/")) {
       try {
         const id = path.split('/').pop();
         const body = await request.json();
 
-        // 1. Atualiza tabela principal
         const stmtFuncionario = env.DB.prepare(`
           UPDATE tb_funcionarios SET 
             nome_completo=?, data_nascimento=?, genero=?, raca=?, estado_civil=?, nacionalidade=?, 
@@ -574,11 +552,9 @@ export default {
           body.cidade, body.cep, body.complemento, body.status, id
         ).run();
 
-        // 2. Verifica se a ficha profissional já existe
         const checkComplemento = await env.DB.prepare("SELECT id FROM tb_funcionarios_complemento WHERE id_funcionario = ?").bind(id).first();
 
         if (checkComplemento) {
-          // Se existe, faz UPDATE normal
           const stmtComplemento = env.DB.prepare(`
             UPDATE tb_funcionarios_complemento SET 
               data_admissao=?, tipo=?, cargo=?, nivel_senioridade=?, 
@@ -594,7 +570,6 @@ export default {
             body.data_demissao, body.tipo_demissao, body.motivo_demissao, id
           ).run();
         } else {
-          // Se não existe, faz INSERT para garantir que os dados não se percam
           const stmtComplemento = env.DB.prepare(`
             INSERT INTO tb_funcionarios_complemento (
               id_funcionario, data_admissao, tipo, cargo, nivel_senioridade, 
@@ -617,7 +592,6 @@ export default {
       }
     }
 
-    // Retorno padrão caso a URL não exista
     return new Response("Rota não encontrada: " + path, { status: 404, headers: corsHeaders });
   }
 };
