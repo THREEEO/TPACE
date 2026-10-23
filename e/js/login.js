@@ -13,7 +13,7 @@ document.getElementById('form-login').addEventListener('submit', async function(
     botaoEntrar.disabled = true;
 
     try {
-        const resposta = await fetch(`${URL_BASE}/login`, {
+        const resposta = await fetch(`${URL_BASE}/api/web/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome: usuarioInput, senha: senhaInput })

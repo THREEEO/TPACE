@@ -58,6 +58,9 @@
             <a href="estoque.html" class="menu-link active" title="Controle de Estoque">
                 <img src="assets/icons/estoque.png" alt="Estoque" class="nav-icon">
             </a>
+            <a href="promocoes.html" class="menu-link" title="Promoções">
+                <img src="assets/icons/promo.png" alt="Promoções" class="nav-icon">
+            </a>
             <a href="index.html" id="btn-sair" class="menu-link" title="Sair">
                 <img src="assets/icons/sair.png" alt="Sair" class="nav-icon">
             </a>
@@ -85,7 +88,6 @@
                 </div>
             </div>
 
-            <!-- ESTRUTURA DA TABELA -->
             <!-- ESTRUTURA DA TABELA -->
             <div class="table-wrapper">
                 <table>
@@ -176,7 +178,15 @@
             <!-- CLASSIFICAÇÃO & ATRIBUTOS -->
             <h4 class="form-section-title">Classificação & Atributos</h4>
             
-            <div class="form-group"><label>Categoria</label><input type="text" id="prod-categoria"></div>
+            <div class="form-group"><label>Categoria</label>
+                <select id="prod-categoria">
+                    <option value="Refrescar">Refrescar</option>
+                    <option value="Energizar">Energizar</option>
+                    <option value="Aquecer">Aquecer</option>
+                    <option value="Saciar">Saciar</option>
+                </select>
+                </div>
+
             <div class="form-group"><label>Linha</label><input type="text" id="prod-linha"></div>
             <div class="form-group"><label>Tipo</label><input type="text" id="prod-tipo"></div>
 
