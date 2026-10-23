@@ -1,11 +1,9 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    // Remove qualquer barra no final do link para evitar erros de 404
     const path = url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname;
     const method = request.method;
 
-    // Cabeçalhos de segurança (CORS)
     const corsHeaders = {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
@@ -13,14 +11,10 @@ export default {
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    // Responde ao "preflight"
     if (method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
     }
 
-    // =====================================================================
-    // ROTAS DO APP (C# - PDV)
-    // =====================================================================
     if (path === "/api/app/produtos") {
       const { results } = await env.DB.prepare("SELECT * FROM tb_produtos").all();
       return new Response(JSON.stringify(results), { headers: corsHeaders });
@@ -139,9 +133,6 @@ export default {
             }
         }
 
-    // =====================================================================
-    // ROTAS DA WEB E DASHBOARD
-    // =====================================================================
     if (path === "/api/web/login" && method === "POST") {
       try {
         const body = await request.json();

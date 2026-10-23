@@ -1,10 +1,8 @@
-/* Centraliza a caixa de login no meio da tela */
 :root {
-    /* Fundos / Backgrounds (Convertidos para Hex CSS RGBA) */
     --bg-topo: #5E3A7D;
     --bg-base: #2A1143;
-    --glass-inicio: #F8F3FCE6; /* Translúcido 90% */
-    --glass-fim: #F8F3FCCC;    /* Translúcido 80% */
+    --glass-inicio: #F8F3FCE6;
+    --glass-fim: #F8F3FCCC;
     --bg-pesquisa: #F8F3FC99;
     --bg-rodape: #F8F3FC44;
     --bg-badge: #A45FCE1A;
