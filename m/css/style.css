@@ -1,10 +1,8 @@
-/* --- RESET E VARIÁVEIS (PALETA OFICIAL T-PACE) --- */
 :root {
-    /* Fundos / Backgrounds (Convertidos para Hex CSS RGBA) */
     --bg-topo: #5E3A7D;
     --bg-base: #2A1143;
-    --glass-inicio: #F8F3FCE6; /* Translúcido 90% */
-    --glass-fim: #F8F3FCCC;    /* Translúcido 80% */
+    --glass-inicio: #F8F3FCE6; 
+    --glass-fim: #F8F3FCCC;    
     --bg-pesquisa: #F8F3FC99;
     --bg-rodape: #F8F3FC44;
     --bg-badge: #A45FCE1A;
@@ -12,7 +10,6 @@
     --bg-linha-selecionada: #2A11431A;
     --bg-linha-hover: #2A11430D;
 
-    /* Bordas e Sombras */
     --border-glass: rgba(255, 255, 255, 0.5);
     --border-pesquisa: #FFFFFF88;
     --border-divisoria: #D6C4E866;
@@ -20,21 +17,17 @@
     --border-badge: #A45FCE44;
     --sombra-escura: #2A1143;
 
-    /* Destaques e Botões */
     --btn-acao: #A45FCE;
     
-    /* Cores Auxiliares (Gráficos e Ações) */
     --chart-turquesa: #68BBBA;
     --chart-rosa: #F25C8F;
 
-    /* Textos e Tipografia */
     --text-escuro: #2A1143;
     --text-secundario: #5E3A7D;
     --text-claro: #F8F3FC;
     --text-rodape: #D6C4E8;
     --text-placeholder: #5E3A7D88;
 
-    /* Fundos Liquid Glass (Bem mais transparentes) */
     --glass-inicio: rgba(255, 255, 255, 0.7); 
     --glass-fim: rgba(255, 255, 255, 0.45);    
 }
@@ -46,34 +39,25 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ==========================================
-   SCROLLBARS PERSONALIZADAS (GLASSMORPHISM)
-   ========================================== */
-
-/* Regra para o Firefox */
 * {
-    scrollbar-width: thin; /* Deixa a barra fininha */
-    scrollbar-color: rgba(164, 95, 206, 0.4) transparent; /* Cor do botão e fundo transparente */
+    scrollbar-width: thin; 
+    scrollbar-color: rgba(164, 95, 206, 0.4) transparent; 
 }
 
-/* Regras para Chrome, Edge, Safari e celulares Android/iOS */
 ::-webkit-scrollbar {
-    width: 6px; /* Deixa a barra vertical bem delicada */
-    height: 6px; /* Deixa a barra horizontal fininha na tabela */
+    width: 6px;
+    height: 6px; 
 }
 
-/* O Fundo da barra (Track) - Totalmente transparente! */
 ::-webkit-scrollbar-track {
     background: transparent; 
 }
 
-/* A "pecinha" que rola (Thumb) - Roxinho de vidro */
 ::-webkit-scrollbar-thumb {
-    background: rgba(164, 95, 206, 0.4); /* Usa o roxo da paleta com transparência */
-    border-radius: 10px; /* Bordas arredondadas e chiques */
+    background: rgba(164, 95, 206, 0.4); 
+    border-radius: 10px; 
 }
 
-/* Quando o usuário clica ou passa o mouse na barra */
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(164, 95, 206, 0.7); 
 }
@@ -84,7 +68,6 @@ html {
     overflow-x: hidden;
 }
 
-/* --- FUNDO LIQUID GLASS --- */
 body {
     background-color: var(--bg-base); 
     color: var(--text-claro);
@@ -92,24 +75,22 @@ body {
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
-    width: 100%;             /* NOVO */
-    max-width: 100%;         /* NOVO */
+    width: 100%;           
+    max-width: 100%;         
     overflow: hidden;
-    overscroll-behavior: none; /* NOVO: Mata o efeito "elástico" de puxar a tela para fora */
+    overscroll-behavior: none; 
     position: relative; 
 }
 
-/* As Formas Flutuantes (Blobs) */
 .blob {
     position: absolute;
-    filter: blur(80px); /* Esse é o segredo do efeito líquido! */
-    z-index: -1; /* Mantém elas atrás de todo o conteúdo */
-    opacity: 0.6; /* Deixa um pouco transparente para não ofuscar o texto */
+    filter: blur(80px); 
+    z-index: -1; 
+    opacity: 0.6; 
     border-radius: 50%;
     animation: flutuar 15s infinite alternate ease-in-out;
 }
 
-/* Esfera 1 - Roxa */
 .blob-1 {
     top: -10%;
     left: -10%;
@@ -119,17 +100,15 @@ body {
     animation-delay: 0s;
 }
 
-/* Esfera 2 - Turquesa */
 .blob-2 {
     bottom: -20%;
     right: -10%;
     width: 500px;
     height: 500px;
     background-color: var(--chart-turquesa);
-    animation-delay: -5s; /* Começa a animação de um ponto diferente */
+    animation-delay: -5s; 
 }
 
-/* Esfera 3 - Rosa (Menor e mais rápida) */
 .blob-3 {
     top: 40%;
     left: 40%;
@@ -373,7 +352,7 @@ th, td {
     padding: 12px 10px;
     text-align: left;
     border-bottom: 1px solid var(--border-divisoria);
-    white-space: nowrap; /* Impede que qualquer campo quebre linha */
+    white-space: nowrap; 
 }
 
 /* Regra para o Nome do Produto cortar com reticências (...) no PC */
@@ -524,8 +503,7 @@ tr:hover {
     width: 100%;
     max-width: 750px;
     color: var(--text-escuro);
-    
-    /* O SEGREDO: Se o form for muito grande, ele cria uma barra de rolagem interna! */
+
     max-height: 90vh;
     overflow-y: auto;
 }
@@ -559,7 +537,6 @@ tr:hover {
    RESPONSIVIDADE DAS TELAS INTERNAS (CELULARES)
    ========================================== */
 
-/* Botão Hamburger Oculto no Desktop */
 .mobile-menu-btn {
     display: none;
     background: transparent;
@@ -587,7 +564,6 @@ tr:hover {
 
 .table-wrapper table { box-shadow: none; }
 
-/* Esconde a coluna da seta e a linha de detalhes no Computador */
 .col-mobile-seta, .td-seta { display: none; }
 .detalhes-row { display: none !important; }
 
@@ -600,9 +576,6 @@ tr:hover {
     transform: rotate(180deg);
 }
 
-/* ==========================================
-   EFEITO LIQUID GLASS 3D (MASTER) - CORRIGIDO
-   ========================================== */
 .topbar, .card, .chart-placeholder, .toolbar, .table-wrapper, 
 .modal-glass, .login-glass-card, .perfil-destaque, .box-info {
     /* Fundo degradê fosco claro */
@@ -623,7 +596,6 @@ tr:hover {
     border-radius: 16px; 
 }
 
-/* Ajustes finos para não quebrar peças específicas */
 .topbar {
     border-radius: 0 0 16px 16px !important;
     border-top: none !important;
@@ -645,21 +617,18 @@ tr:hover {
         align-items: center; 
     }
 
-    /* 1. Botão Sanduíche na extrema ESQUERDA */
     .mobile-menu-btn {
         order: 1;
         display: flex; 
         margin-right: 15px; 
     }
 
-    /* 2. Logo T-PACE logo após o botão */
     .topbar-brand { 
         order: 2; 
         margin-right: auto; 
         white-space: nowrap;
     }
-    
-    /* 3. Usuário na extrema DIREITA */
+
     .user-info {
         order: 3;
         margin: 0;
@@ -668,7 +637,6 @@ tr:hover {
 
     .topbar-divider { display: none; } 
 
-    /* 4. O SUB-MENU ABAIXO (Sanfona) */
     .topbar-menu {
         order: 4; 
         width: 100%; 
@@ -706,9 +674,6 @@ tr:hover {
     .toolbar div { display: flex; width: 100%; gap: 10px; }
     .toolbar .btn { flex: 1; padding: 12px 5px; font-size: 12px; }
 
-   /* ==========================================
-       A MÁGICA DA TABELA MAGRINHA (SEM ROLAGEM)
-       ========================================== */
     .table-wrapper {
         overflow-x: hidden !important; /* Bloqueia a rolagem horizontal de vez */
     }
@@ -724,27 +689,23 @@ th, td {
         padding: 7px 3px !important;
         font-size: 13px !important;
         line-height: 1.2;
-        white-space: nowrap !important; /* Impede a quebra de linha no celular */
+        white-space: nowrap !important; 
     }
-    
-    /* Coluna 1 (Código) - Fixo, sem quebra, usa reticências se faltar espaço */
+
     th:nth-child(1), td:nth-child(1) {
-         width: 35% !important; /* Um pouco mais de espaço para os códigos */
+         width: 35% !important; 
          overflow: hidden !important;
          text-overflow: ellipsis !important;
     }
     
-    /* Coluna 2 (Produto) - Nome extenso vira reticências (...) */
     th:nth-child(2), td:nth-child(2) {
          width: 55% !important;
          overflow: hidden !important;
          text-overflow: ellipsis !important;
     }
     
-    /* Esconde as colunas extras de vez! */
     .col-desktop { display: none !important; }
-    
-    /* Coluna da Setinha */
+
     .col-mobile-seta, .td-seta { 
         display: table-cell !important; 
         width: 10% !important; 
@@ -754,7 +715,6 @@ th, td {
 
     .linha-produto { cursor: pointer; }
 
-    /* Linha de Detalhes (Sanfona) */
     .detalhes-row.open {
         display: table-row !important;
         background-color: var(--bg-linha-selecionada);
@@ -789,15 +749,14 @@ th, td {
        MODAL E FORMULÁRIOS NO CELULAR
        ========================================== */
     .modal-overlay {
-        padding: 15px; /* Não deixa o vidro encostar na borda da tela */
+        padding: 15px; 
     }
 
     .modal-glass {
         padding: 20px;
-        max-height: 85vh; /* Dá espaço para o teclado virtual não bugar a tela */
+        max-height: 85vh; 
     }
 
-    /* Coloca todos os campos em 1 única coluna */
     .form-grid { 
         grid-template-columns: 1fr; 
         gap: 12px; 
@@ -807,13 +766,11 @@ th, td {
         grid-column: span 1; 
     }
 
-    /* Inputs confortáveis para o dedo e blindados contra o zoom do iPhone */
     .form-group input, .form-group select {
         padding: 12px 15px;
         font-size: 16px !important; 
     }
 
-    /* Botões empilhados (Salvar em cima, Cancelar embaixo) */
     .modal-actions {
         flex-direction: column-reverse; 
         gap: 10px;
@@ -825,13 +782,12 @@ th, td {
         padding: 14px;
         font-size: 15px;
     }
-    
-    /* Empilha os Cards do Dashboard */
+
     .dashboard-cards {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    /* --- Ajustes do Gráfico no Celular --- */
+
     .chart-header {
         flex-direction: column; 
         align-items: flex-start;
@@ -847,18 +803,17 @@ th, td {
 }
 
 /* ==========================================
-   RODAPÉ THREEE (Páginas Internas)
+   RODAPÉ THREEEO 
    ========================================== */
 .threeeo-footer {
     text-align: center;
-    padding: 15px; /* Adicionado padding ao redor */
+    padding: 15px; 
     margin-top: 20px;
-    margin-bottom: 10px; /* Desgruda do fim da tela */
+    margin-bottom: 10px;
     font-size: 13px;
-    color: var(--text-claro); /* Mudado para claro para maior contraste */
+    color: var(--text-claro); 
     border-top: 1px solid var(--border-divisoria);
     
-    /* Um fundo levemente escurecido para isolar do LiquidGlass */
     background: rgba(42, 17, 67, 0.3); 
     border-radius: 8px;
     backdrop-filter: blur(4px);

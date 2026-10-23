@@ -23,14 +23,13 @@ document.addEventListener("DOMContentLoaded", async function() {
         const topProdutos = await resGrafico.json();
         
         renderizarGraficoProdutos(topProdutos);
-
     } catch (erro) {
         console.error("Erro ao carregar dashboard:", erro);
         cardVendas.innerText = "Erro";
         cardAtendimentos.innerText = "Erro";
         cardAlertas.innerText = "Erro";
     }
-});
+}); // <-- CORREÇÃO: O fechamento "});" estava faltando no arquivo original
 
 function renderizarGraficoProdutos(dados) {
     const ctx = document.getElementById('meuGrafico').getContext('2d');
@@ -46,7 +45,7 @@ function renderizarGraficoProdutos(dados) {
                 borderRadius: 6
             }]
         },
-        options: { 
+        options: {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false

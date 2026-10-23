@@ -1,10 +1,9 @@
 /* Centraliza a caixa de login no meio da tela */
 :root {
-    /* Fundos / Backgrounds (Convertidos para Hex CSS RGBA) */
     --bg-topo: #5E3A7D;
     --bg-base: #2A1143;
-    --glass-inicio: #F8F3FCE6; /* Translúcido 90% */
-    --glass-fim: #F8F3FCCC;    /* Translúcido 80% */
+    --glass-inicio: #F8F3FCE6; 
+    --glass-fim: #F8F3FCCC;  
     --bg-pesquisa: #F8F3FC99;
     --bg-rodape: #F8F3FC44;
     --bg-badge: #A45FCE1A;
@@ -40,7 +39,7 @@
     width: 100vw;
     padding: 20px;
     box-sizing: border-box;
-    position: relative; /* ADICIONE ESTA LINHA */
+    position: relative; 
 }
 
 .login-footer {
@@ -49,11 +48,11 @@
     width: 100%;
     text-align: center;
     font-size: 13px;
-    color: var(--text-rodape); /* <-- Lilás claro */
+    color: var(--text-rodape); 
 }
 
 .login-footer a {
-    color: var(--chart-rosa); /* <-- Rosa de destaque */
+    color: var(--chart-rosa); 
     font-weight: bold;
     text-decoration: none;
     letter-spacing: 1px;
@@ -66,15 +65,13 @@
     text-shadow: 0 0 10px rgba(104, 187, 186, 0.8);
 }
 
-/* O Cartão de Vidro do Login */
 .login-glass-card {
     background: linear-gradient(135deg, var(--glass-inicio), var(--glass-fim));
     padding: 40px;
-    border-radius: 16px; /* Borda um pouco mais arredondada fica melhor no mobile */
+    border-radius: 16px; 
     border: 1px solid var(--border-glass);
     box-shadow: 0 8px 32px rgba(42, 17, 67, 0.3);
     
-    /* Desfoque do Vidro com suporte para iPhones (Safari) */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     
@@ -100,7 +97,6 @@
     font-size: 14px;
 }
 
-/* Campos de Input */
 .input-group {
     margin-bottom: 20px;
     display: flex;
@@ -117,8 +113,8 @@
 
 .input-group input {
     width: 100%;
-    padding: 14px 15px; /* Altura ideal para o toque dos dedos */
-    font-size: 16px; /* 16px obrigatório para não dar zoom no iPhone */
+    padding: 14px 15px; 
+    font-size: 16px; 
     background-color: var(--bg-pesquisa);
     border: 1px solid var(--border-divisoria);
     border-radius: 8px;
@@ -141,9 +137,8 @@
     border-radius: 8px;
 }
 
-/* Mensagem de Erro Oculta por padrão */
 .error-message {
-    color: var(--chart-rosa); /* Usando o rosa da paleta para dar destaque */
+    color: var(--chart-rosa);
     font-size: 13px;
     font-weight: bold;
     text-align: center;
@@ -155,37 +150,33 @@
    MÍDIAS RESPONSIVAS (TODOS OS CELULARES MODERNOS)
    ========================================== */
 @media screen and (max-width: 768px) {
-    /* 1. O "Negócio" (Card) fica mais apertadinho e compacto */
+
     .login-glass-card {
-        padding: 25px 20px; /* Reduzimos bem o espaço interno */
-        max-width: 90%; /* Garante que a caixa não ocupe a tela toda */
+        padding: 25px 20px;
+        max-width: 90%; 
     }
 
-    /* 2. O Cabeçalho fica menor e com menos espaço sobrando */
     .login-header {
         margin-bottom: 20px;
     }
 
     .login-header h1 {
-        font-size: 26px; /* Título mais delicado */
+        font-size: 26px; 
     }
 
     .login-header p {
         font-size: 12px;
     }
 
-    /* 3. Espaço entre os campos de texto menor */
     .input-group {
         margin-bottom: 15px;
     }
 
-    /* 4. Os campos de digitar mantêm 16px pra Apple não dar zoom automático! */
     .input-group input {
         padding: 12px 15px; 
         font-size: 16px; 
     }
 
-    /* 5. O Botão de Entrar fica mais fino */
     .btn-block {
         padding: 12px;
         margin-top: 5px;

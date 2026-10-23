@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="css/style.css?v=5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* Estilos da "Página" de Detalhes e Caixas (Boxes) */
         #tela-detalhes { display: none; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -24,7 +23,6 @@
         .perfil-info h2 { margin: 0; color: var(--text-escuro); font-size: 22px; margin-bottom: 5px; text-shadow: none; }
         .perfil-info p { margin: 0; color: var(--text-secundario); font-weight: bold; font-size: 14px; }
 
-        /* As duas Boxes Bonitinhas */
         .boxes-container { display: flex; gap: 25px; flex-wrap: wrap; }
         .box-info { flex: 1; min-width: 320px; background: linear-gradient(135deg, var(--glass-inicio), var(--glass-fim)); padding: 30px; border-radius: 12px; border: 1px solid var(--border-glass); box-shadow: 0 4px 15px rgba(42, 17, 67, 0.15); backdrop-filter: blur(12px); color: var(--text-escuro); }
         .box-info h3 { margin-top: 0; color: var(--btn-acao); border-bottom: 2px solid var(--border-divisoria); padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; font-size: 16px; }
@@ -37,7 +35,6 @@
         .clickable-name { color: var(--btn-acao); cursor: pointer; font-weight: bold; transition: 0.2s; }
         .clickable-name:hover { text-decoration: underline; color: var(--text-secundario); }
 
-        /* Modal */
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .form-section-title { grid-column: span 3; margin-top: 20px; border-bottom: 1px solid var(--border-divisoria); padding-bottom: 5px; color: var(--text-secundario); font-size: 14px; text-transform: uppercase; }
         @media screen and (max-width: 768px) {
@@ -89,7 +86,6 @@
                     <button class="btn" onclick="abrirModalNovo()">+ Adicionar Funcionário</button>
                 </div>
 
-                <!-- ADICIONE ESTA DIV ENVOLVENDO A TABELA -->
                 <div class="table-wrapper">
                     <table>
                         <thead>
@@ -107,16 +103,14 @@
                     </table>
                 </div>
 
-            <!-- TELA DE DETALHES (BOXES E FOTO) -->
             <div id="tela-detalhes">
                 <div class="detalhes-header">
                     <button class="btn-voltar" onclick="voltarParaLista()"><i class="fas fa-arrow-left"></i> Voltar</button>
                 </div>
 
                 <div class="perfil-destaque">
-                    <!-- Espaço para a foto futura -->
                     <div class="foto-espaco">
-                        <i class="fas fa-user"></i> <!-- Ícone provisório -->
+                        <i class="fas fa-user"></i>
                     </div>
                     <div class="perfil-info">
                         <h2 id="detalhe-nome-titulo">Nome do Funcionário</h2>
