@@ -1,7 +1,10 @@
 const urlAPIProdutos = "https://tpace-api.whyguiih.workers.dev/api/web/produtos";
 const urlAPIUpload = "https://tpace-api.whyguiih.workers.dev/api/web/upload";
 let listaProdutos = [];
-let codigosBipados = []; 
+let produtosFiltradosAtuais = null; // Guarda o filtro ativo se o usuário estiver pesquisando
+let codigosBipados = [];
+let paginaAtual = 1;
+const ITENS_POR_PAGINA = 25;
 
 document.addEventListener("DOMContentLoaded", function() {
     carregarProdutos();
@@ -86,10 +89,22 @@ function gerarCodigoGeral() {
 async function carregarProdutos() {
     const tbody = document.getElementById('tabela-estoque');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Carregando produtos...</td></tr>';
+
     try {
         const resposta = await fetch(urlAPIProdutos);
-        listaProdutos = await resposta.json();
-        renderizarTabela(listaProdutos);
+        const dados = await resposta.json();
+
+        // Ordena do mais novo para o mais velho (maior ID primeiro)
+        listaProdutos = dados.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+
+        // Se havia uma pesquisa digitada no input, mantém o filtro; senão exibe tudo
+        const termoBusca = document.getElementById('inputPesquisa')?.value.trim().toLowerCase() || '';
+        if (termoBusca) {
+            filtrarTabela(termoBusca, false);
+        } else {
+            produtosFiltradosAtuais = null;
+            renderizarTabela(listaProdutos);
+        }
     } catch (erro) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Erro ao carregar o estoque.</td></tr>';
     }
@@ -293,6 +308,7 @@ async function salvarProduto(event) {
         }
 
         fecharModal();
+        if (isNovo) paginaAtual = 1;
         carregarProdutos();
         
     } catch (erro) {
@@ -434,29 +450,37 @@ if (inputPesquisa) {
     });
 }
 
-function filtrarTabela(termo) {
-        if (!termo) return renderizarTabela(listaProdutos);
-        
-        const filtrados = listaProdutos.filter(prod => {
-            const nome = String(prod.nome || "").toLowerCase();
-            const codigo = String(prod.codigo_barras || "").toLowerCase();
-            const geral = String(prod.codigo_geral || "").toLowerCase();
-            
-            return nome.includes(termo) || codigo.includes(termo) || geral.includes(termo);
-        });
-        
-        renderizarTabela(filtrados);
+function filtrarTabela(termo, resetarPagina = true) {
+    if (resetarPagina) paginaAtual = 1;
+
+    if (!termo) {
+        produtosFiltradosAtuais = null;
+        return renderizarTabela(listaProdutos);
     }
+    
+    produtosFiltradosAtuais = listaProdutos.filter(prod => {
+        const nome = String(prod.nome || "").toLowerCase();
+        const codigo = String(prod.codigo_barras || "").toLowerCase();
+        const geral = String(prod.codigo_geral || "").toLowerCase();
+        
+        return nome.includes(termo) || codigo.includes(termo) || geral.includes(termo);
+    });
+    
+    renderizarTabela(produtosFiltradosAtuais);
+}
 
 function renderizarTabela(produtos) {
     const tbody = document.getElementById('tabela-estoque');
+    const divPaginacao = document.getElementById('paginacao-estoque');
     tbody.innerHTML = '';
     
     if (!produtos || produtos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum produto encontrado.</td></tr>';
+        if (divPaginacao) divPaginacao.innerHTML = '';
         return;
     }
 
+    // 1. Agrupamento por codigo_geral (mantendo a lógica original do sistema)
     const grupos = {};
     produtos.forEach(prod => {
         const chave = prod.codigo_geral ? `geral_${prod.codigo_geral}` : `id_${prod.id}`;
@@ -464,16 +488,34 @@ function renderizarTabela(produtos) {
             grupos[chave] = { 
                 ...prod, 
                 chave_grupo: chave,
-                ids: [prod.id]
+                ids: [prod.id],
+                maior_id: Number(prod.id) || 0
             };
         } else {
             grupos[chave].ids.push(prod.id);
+            if ((Number(prod.id) || 0) > grupos[chave].maior_id) {
+                grupos[chave].maior_id = Number(prod.id) || 0;
+            }
         }
     });
 
-    const produtosAgrupados = Object.values(grupos);
+    // 2. Garante que os grupos também fiquem do mais novo para o mais velho
+    const produtosAgrupados = Object.values(grupos).sort((a, b) => b.maior_id - a.maior_id);
 
-    produtosAgrupados.forEach(grupo => {
+    // 3. Cálculo automático de páginas (25 por página)
+    const totalProdutos = produtosAgrupados.length;
+    const totalPaginas = Math.ceil(totalProdutos / ITENS_POR_PAGINA);
+
+    // Se uma página deixou de existir (ex: após excluir produtos), ajusta automaticamente
+    if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+    if (paginaAtual < 1) paginaAtual = 1;
+
+    const indiceInicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    const indiceFim = indiceInicio + ITENS_POR_PAGINA;
+    const produtosDaPagina = produtosAgrupados.slice(indiceInicio, indiceFim);
+
+    // 4. Renderiza APENAS os 25 produtos da página atual
+    produtosDaPagina.forEach(grupo => {
         let classeBadge = '', textoStatus = '';
         
         const qtd = parseFloat(grupo.quantidade) || 0; 
@@ -500,13 +542,15 @@ function renderizarTabela(produtos) {
             textoCodigo = `<i class="fas fa-layer-group" style="color: var(--text-secundario); margin-right: 5px;"></i>Múltiplos (${grupo.ids.length})`;
         }
 
+        const categoriaTexto = grupo.categoria || 'Geral';
+
         const trPrincipal = document.createElement('tr');
         trPrincipal.className = "linha-produto";
         trPrincipal.onclick = () => toggleDetalhesEstoque(grupo.chave_grupo); 
         trPrincipal.innerHTML = `
             <td>${textoCodigo}</td>
             <td>${grupo.nome}</td>
-            <td class="col-desktop">Geral</td>
+            <td class="col-desktop">${categoriaTexto}</td>
             <td class="col-desktop">${qtd} ${grupo.unidade_venda}</td>
             <td class="col-desktop">${conteudoPreco}</td>
             <td class="col-desktop"><span class="status-badge ${classeBadge}">${textoStatus}</span></td>
@@ -538,7 +582,80 @@ function renderizarTabela(produtos) {
     });
     
     ocultarBotoesSeRepositor();
+    renderizarBotoesPaginacao(totalPaginas, totalProdutos, indiceInicio + 1, Math.min(indiceFim, totalProdutos));
 }
+
+// ==========================================
+// BOTÕES DE NAVEGAÇÃO DE PÁGINAS (ESTILO NUMERADO)
+// ==========================================
+function renderizarBotoesPaginacao(totalPaginas, totalProdutos, itemInicial, itemFinal) {
+    const container = document.getElementById('paginacao-estoque');
+    if (!container) return;
+
+    // Se houver apenas 1 página e no máximo 25 produtos, mostra apenas o botão 1 ou oculta se preferir
+    let htmlBotoes = '';
+
+    // Botões: Primeira (<<) e Anterior (<)
+    htmlBotoes += `
+        <button class="page-btn" onclick="irParaPagina(1)" ${paginaAtual === 1 ? 'disabled' : ''} title="Primeira Página">&laquo;</button>
+        <button class="page-btn" onclick="irParaPagina(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''} title="Página Anterior">&lsaquo;</button>
+    `;
+
+    // Janela deslizante de páginas (mostra até 5 números ao redor da página atual, estilo Rule34)
+    const maxBotoesVisiveis = 5;
+    let paginaInicial = Math.max(1, paginaAtual - Math.floor(maxBotoesVisiveis / 2));
+    let paginaFinal = Math.min(totalPaginas, paginaInicial + maxBotoesVisiveis - 1);
+
+    if (paginaFinal - paginaInicial + 1 < maxBotoesVisiveis) {
+        paginaInicial = Math.max(1, paginaFinal - maxBotoesVisiveis + 1);
+    }
+
+    if (paginaInicial > 1) {
+        htmlBotoes += `<button class="page-btn" onclick="irParaPagina(1)">1</button>`;
+        if (paginaInicial > 2) {
+            htmlBotoes += `<span class="page-dots">...</span>`;
+        }
+    }
+
+    for (let i = paginaInicial; i <= paginaFinal; i++) {
+        const classeAtiva = (i === paginaAtual) ? 'active' : '';
+        htmlBotoes += `<button class="page-btn ${classeAtiva}" onclick="irParaPagina(${i})">${i}</button>`;
+    }
+
+    if (paginaFinal < totalPaginas) {
+        if (paginaFinal < totalPaginas - 1) {
+            htmlBotoes += `<span class="page-dots">...</span>`;
+        }
+        htmlBotoes += `<button class="page-btn" onclick="irParaPagina(${totalPaginas})">${totalPaginas}</button>`;
+    }
+
+    // Botões: Próxima (>) e Última (>>)
+    htmlBotoes += `
+        <button class="page-btn" onclick="irParaPagina(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''} title="Próxima Página">&rsaquo;</button>
+        <button class="page-btn" onclick="irParaPagina(${totalPaginas})" ${paginaAtual === totalPaginas ? 'disabled' : ''} title="Última Página">&raquo;</button>
+    `;
+
+    container.innerHTML = `
+        <div class="pagination-controls">
+            ${htmlBotoes}
+        </div>
+        <div class="pagination-info">
+            Exibindo ${itemInicial}–${itemFinal} de ${totalProdutos} produtos (Página ${paginaAtual} de ${totalPaginas})
+        </div>
+    `;
+}
+
+window.irParaPagina = function(novaPagina) {
+    paginaAtual = novaPagina;
+    const listaAlvo = produtosFiltradosAtuais !== null ? produtosFiltradosAtuais : listaProdutos;
+    renderizarTabela(listaAlvo);
+
+    // Sobe suavemente para o topo da tabela ao trocar de página
+    const screenContainer = document.querySelector('.screen-container');
+    if (screenContainer) {
+        screenContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
 
 window.toggleDetalhesEstoque = function(chave) {
     const linha = document.getElementById(`detalhes-${chave}`);

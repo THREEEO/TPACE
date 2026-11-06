@@ -1,4 +1,4 @@
-const URL_BASE = 'https://codecream.larissagazoli45.workers.dev/';
+const URL_BASE = 'https://codecream.larissagazoli45.workers.dev';
 let graficoChart = null; // Variável global para armazenar o gráfico
 let listaVendasGlobal = []; // NOVA variável para armazenar as vendas na memória
 

@@ -1,13 +1,75 @@
-
 const URL_BASE = "https://codecream.larissagazoli45.workers.dev";
 let listaPromocoes = [];
+
+// ==========================================
+// AVISOS E CONFIRMAÇÕES (LIQUID GLASS)
+// ==========================================
+window.mostrarAviso = function(mensagem, tipo = 'erro', titulo = '') {
+    let container = document.querySelector('.tpace-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'tpace-toast-container';
+        document.body.appendChild(container);
+    }
+    const titulosPadrao = { sucesso: 'Sucesso', erro: 'Erro', aviso: 'Atenção' };
+    const iconesPadrao = { sucesso: '✓', erro: '!', aviso: 'i' };
+
+    const toast = document.createElement('div');
+    toast.className = `tpace-toast toast-${tipo}`;
+    toast.innerHTML = `
+        <div class="tpace-toast-icon">${iconesPadrao[tipo] || '!'}</div>
+        <div class="tpace-toast-body">
+            <span class="tpace-toast-title">${titulo || titulosPadrao[tipo]}</span>
+            <span class="tpace-toast-msg">${mensagem}</span>
+        </div>
+        <button class="tpace-toast-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'toastFadeOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 4000);
+};
+
+window.confirmarAcao = function(mensagem, titulo = 'Encerrar Campanha') {
+    return new Promise((resolve) => {
+        let overlay = document.getElementById('tpace-confirm-modal');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'tpace-confirm-modal';
+            overlay.className = 'tpace-confirm-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.innerHTML = `
+            <div class="tpace-confirm-box">
+                <div class="tpace-confirm-icon">!</div>
+                <div class="tpace-confirm-title">${titulo}</div>
+                <div class="tpace-confirm-text">${mensagem}</div>
+                <div class="tpace-confirm-actions">
+                    <button type="button" class="btn btn-outline" id="tpace-btn-cancel">Cancelar</button>
+                    <button type="button" class="btn" id="tpace-btn-ok">Confirmar</button>
+                </div>
+            </div>
+        `;
+        requestAnimationFrame(() => overlay.classList.add('active'));
+
+        const fechar = (res) => {
+            overlay.classList.remove('active');
+            resolve(res);
+        };
+        document.getElementById('tpace-btn-cancel').onclick = () => fechar(false);
+        document.getElementById('tpace-btn-ok').onclick = () => fechar(true);
+    });
+};
 
 document.addEventListener("DOMContentLoaded", function() {
     carregarPromocoes();
     carregarProdutosParaModal();
     document.getElementById('form-promocao').addEventListener('submit', salvarPromocao);
-    
-    // Filtro de pesquisa rápida
+         
     const inputPesquisa = document.getElementById('inputPesquisa');
     if (inputPesquisa) {
         inputPesquisa.addEventListener('input', (e) => {
@@ -23,31 +85,31 @@ document.addEventListener("DOMContentLoaded", function() {
 async function carregarPromocoes() {
     const tbody = document.getElementById('tabela-promocoes');
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Carregando promoções...</td></tr>';
-    
+         
     try {
         const resposta = await fetch(`${URL_BASE}/promocoes`);
         listaPromocoes = await resposta.json();
-        
+                 
         if (!Array.isArray(listaPromocoes)) listaPromocoes = [];
         renderizarTabela(listaPromocoes);
     } catch (erro) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--chart-rosa);">Erro ao carregar promoções.</td></tr>';
+        mostrarAviso("Erro ao carregar a lista de promoções.", "erro");
     }
 }
 
 function renderizarTabela(promocoes) {
     const tbody = document.getElementById('tabela-promocoes');
     tbody.innerHTML = '';
-    
+         
     if (promocoes.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhuma promoção cadastrada.</td></tr>';
         return;
     }
-    
+         
     promocoes.forEach(promo => {
         const id = promo.id_promocao;
-        
-        // Verifica se a data passou
+                 
         let statusBadge = '<span class="status-badge status-good">Ativa</span>';
         if (promo.data_final) {
             const dataFinal = new Date(promo.data_final);
@@ -55,8 +117,7 @@ function renderizarTabela(promocoes) {
                 statusBadge = '<span class="status-badge status-critical">Expirada</span>';
             }
         }
-        
-        // Formatar data para exibição
+                 
         let dataVisual = '-';
         if (promo.data_final) {
             const d = new Date(promo.data_final);
@@ -87,37 +148,30 @@ window.abrirModalNovo = function() {
     document.getElementById('preview-imagem').style.display = 'none';
     document.getElementById('icone-imagem').style.display = 'block';
     document.getElementById('promo-imagem-url').value = "";
-    
-    // Adicione esta linha: Limpa os produtos marcados de promoções anteriores
-    desmarcarTodos(); 
-    
-    // Volta os filtros pro padrão
+         
+    desmarcarTodos();
     document.getElementById('filtro-cat-modal').value = "";
     document.getElementById('filtro-linha-modal').value = "";
-    filtrarProdutosModal(); // Reseta a lista para mostrar todos
-
+    filtrarProdutosModal();
     document.getElementById('modal-promocao').classList.add('active');
-}
+};
 
 window.fecharModal = function() {
     document.getElementById('modal-promocao').classList.remove('active');
-}
+};
 
-// Upload da Imagem (Reaproveita a mesma rota do R2)
 window.previewImagem = async function(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
-    // Preview local imediato
+         
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('preview-imagem').src = e.target.result;
         document.getElementById('preview-imagem').style.display = 'block';
         document.getElementById('icone-imagem').style.display = 'none';
-    }
+    };
     reader.readAsDataURL(file);
 
-    // Upload pro Cloudflare
     const formData = new FormData();
     formData.append("file", file);
 
@@ -129,14 +183,14 @@ window.previewImagem = async function(event) {
         const data = await res.json();
         if (data.sucesso) {
             document.getElementById('promo-imagem-url').value = data.url;
+            mostrarAviso("Imagem carregada com sucesso!", "sucesso");
         } else {
-            alert("Erro ao fazer upload da imagem.");
+            mostrarAviso("Erro ao fazer upload da imagem.", "erro");
         }
     } catch (e) {
-        alert("Erro de conexão no upload.");
+        mostrarAviso("Erro de conexão no upload da imagem.", "erro");
     }
-}
-
+};
 
 window.abrirModalEditar = function(id) {
     const promo = listaPromocoes.find(p => p.id_promocao === id);
@@ -144,21 +198,18 @@ window.abrirModalEditar = function(id) {
 
     document.getElementById('modal-titulo').innerText = "Editar Promoção";
     document.getElementById('promo-id').value = promo.id_promocao;
-    
-    // Preenche os dados de texto
+         
     document.getElementById('promo-nome').value = promo.nome_campanha || "";
     document.getElementById('promo-descricao').value = promo.descricao || "";
     document.getElementById('promo-desconto').value = promo.maxima_desconto || "";
     document.getElementById('promo-segmento').value = promo.segmento_produtos || "sorvete";
-    
-    // Preenche a data
+         
     if (promo.data_final) {
         document.getElementById('promo-data-final').value = promo.data_final;
     } else {
         document.getElementById('promo-data-final').value = "";
     }
 
-    // Lida com a imagem
     if (promo.foto) {
         document.getElementById('preview-imagem').src = promo.foto;
         document.getElementById('preview-imagem').style.display = 'block';
@@ -170,12 +221,11 @@ window.abrirModalEditar = function(id) {
         document.getElementById('promo-imagem-url').value = "";
     }
 
-    // Marca os produtos que já estavam selecionados
     desmarcarTodos();
     if (promo.produtos_selecionados) {
         const produtosArray = promo.produtos_selecionados.split(',');
         const checkboxes = document.querySelectorAll('.check-produto');
-        
+                 
         checkboxes.forEach(cb => {
             if (produtosArray.includes(cb.value)) {
                 cb.checked = true;
@@ -183,13 +233,11 @@ window.abrirModalEditar = function(id) {
         });
     }
 
-    // Reseta filtros visuais
     document.getElementById('filtro-cat-modal').value = "";
     document.getElementById('filtro-linha-modal').value = "";
     filtrarProdutosModal();
-
     document.getElementById('modal-promocao').classList.add('active');
-}
+};
 
 async function salvarPromocao(event) {
     event.preventDefault();
@@ -213,15 +261,14 @@ async function salvarPromocao(event) {
         produtos_selecionados: produtosMarcados,
         foto: document.getElementById('promo-imagem-url').value || null
     };
-    
-    // Se for edição, anexa o ID no objeto
+         
     if (!isNovo) {
         dados.id_promocao = id;
     }
 
     try {
         const metodo = isNovo ? 'POST' : 'PUT';
-        
+                 
         const res = await fetch(`${URL_BASE}/promocoes`, {
             method: metodo,
             headers: { 'Content-Type': 'application/json' },
@@ -229,11 +276,12 @@ async function salvarPromocao(event) {
         });
 
         if (!res.ok) throw new Error("Erro na API.");
-        
+                 
         fecharModal();
         carregarPromocoes();
+        mostrarAviso(isNovo ? "Campanha criada com sucesso!" : "Campanha atualizada com sucesso!", "sucesso");
     } catch (erro) {
-        alert("Falha ao salvar a campanha.");
+        mostrarAviso("Falha ao salvar a campanha.", "erro");
     } finally {
         btn.innerText = "Salvar Promoção";
         btn.disabled = false;
@@ -241,21 +289,23 @@ async function salvarPromocao(event) {
 }
 
 window.excluirPromocao = async function(id, nome) {
-    if (confirm(`Tem certeza que deseja encerrar e excluir a campanha "${nome}"?`)) {
+    const confirmado = await confirmarAcao(`Tem certeza que deseja encerrar e excluir a campanha "${nome}"?`);
+    if (confirmado) {
         try {
             const res = await fetch(`${URL_BASE}/promocoes`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_promocao: id })
             });
-            
+                         
             if(!res.ok) throw new Error("Erro ao excluir.");
             carregarPromocoes();
+            mostrarAviso(`Campanha "${nome}" excluída com sucesso!`, "sucesso");
         } catch (erro) {
-            alert("Erro de conexão ao excluir.");
+            mostrarAviso("Erro de conexão ao excluir a campanha.", "erro");
         }
     }
-}
+};
 
 let todosProdutos = [];
 
@@ -263,18 +313,18 @@ async function carregarProdutosParaModal() {
     try {
         const res = await fetch(`${URL_BASE}/produtos`);
         if (!res.ok) throw new Error("Falha ao comunicar com a API.");
-        
+                 
         todosProdutos = await res.json();
-        
+                 
         const categorias = [...new Set(todosProdutos.map(p => p.categoria).filter(Boolean))];
         const linhas = [...new Set(todosProdutos.map(p => p.linha).filter(Boolean))];
-        
+                 
         const selCat = document.getElementById('filtro-cat-modal');
         const selLinha = document.getElementById('filtro-linha-modal');
-        
+                 
         categorias.forEach(c => selCat.innerHTML += `<option value="${c}">${c}</option>`);
         linhas.forEach(l => selLinha.innerHTML += `<option value="${l}">${l}</option>`);
-        
+                 
         renderizarCheckboxesProdutos(todosProdutos);
     } catch (e) {
         console.error("Erro ao buscar produtos", e);
@@ -288,7 +338,7 @@ async function carregarProdutosParaModal() {
 function renderizarCheckboxesProdutos(produtos) {
     const div = document.getElementById('lista-produtos-checkbox');
     div.innerHTML = '';
-    
+         
     if(produtos.length === 0) {
         div.innerHTML = '<span style="color: var(--chart-rosa);">Nenhum produto cadastrado no sistema.</span>';
         return;
@@ -298,8 +348,7 @@ function renderizarCheckboxesProdutos(produtos) {
         const nome = p.nome || p.nome_produto || 'Produto sem nome';
         const cat = p.categoria || '';
         const linha = p.linha || '';
-        
-        // Criamos o checkbox escondendo os dados de categoria e linha nas tags HTML para facilitar o filtro visual depois
+                 
         div.innerHTML += `
             <label class="item-produto-check" data-cat="${cat}" data-linha="${linha}" style="display: flex; align-items: flex-start; gap: 8px; color: var(--text-escuro); font-size: 13px; cursor: pointer;">
                 <input type="checkbox" class="check-produto" value="${nome}" style="margin-top: 3px;">
@@ -312,26 +361,23 @@ function renderizarCheckboxesProdutos(produtos) {
     });
 }
 
-// Lógica para esconder e mostrar os checkboxes conforme os filtros de linha/categoria
 window.filtrarProdutosModal = function() {
     const cat = document.getElementById('filtro-cat-modal').value;
     const linha = document.getElementById('filtro-linha-modal').value;
-    
+         
     const itens = document.querySelectorAll('.item-produto-check');
     itens.forEach(item => {
         const matchCat = (cat === "" || item.getAttribute('data-cat') === cat);
         const matchLinha = (linha === "" || item.getAttribute('data-linha') === linha);
-        
-        // Se combinar com o filtro, mostra, senão esconde
+                 
         if (matchCat && matchLinha) {
             item.style.display = 'flex';
         } else {
             item.style.display = 'none';
         }
     });
-}
+};
 
-// Botões práticos
 window.selecionarVisiveis = function() {
     const itens = document.querySelectorAll('.item-produto-check');
     itens.forEach(item => {
@@ -339,9 +385,9 @@ window.selecionarVisiveis = function() {
             item.querySelector('.check-produto').checked = true;
         }
     });
-}
+};
 
 window.desmarcarTodos = function() {
     const checkboxes = document.querySelectorAll('.check-produto');
     checkboxes.forEach(cb => cb.checked = false);
-}
+};

@@ -1,9 +1,39 @@
+window.mostrarAviso = function(mensagem, tipo = 'erro', titulo = '') {
+    let container = document.querySelector('.tpace-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'tpace-toast-container';
+        document.body.appendChild(container);
+    }
+    const titulosPadrao = { sucesso: 'Sucesso', erro: 'Erro', aviso: 'Atenção' };
+    const iconesPadrao = { sucesso: '✓', erro: '!', aviso: 'i' };
+
+    const toast = document.createElement('div');
+    toast.className = `tpace-toast toast-${tipo}`;
+    toast.innerHTML = `
+        <div class="tpace-toast-icon">${iconesPadrao[tipo] || '!'}</div>
+        <div class="tpace-toast-body">
+            <span class="tpace-toast-title">${titulo || titulosPadrao[tipo]}</span>
+            <span class="tpace-toast-msg">${mensagem}</span>
+        </div>
+        <button class="tpace-toast-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'toastFadeOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 4000);
+};
+
 // ==========================================
 // CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
 // ==========================================
-const urlAPIPessoal = "https://tpace-api.whyguiih.workers.dev/api/web/funcionarios/pessoal";
-const urlAPIProfissional = "https://tpace-api.whyguiih.workers.dev/api/web/funcionarios/profissional";
-const urlAPIFuncionariosGeral = "https://tpace-api.whyguiih.workers.dev/api/web/funcionarios";
+const urlAPIPessoal = "https://codecream.larissagazoli45.workers.dev/api/web/funcionarios/pessoal";
+const urlAPIProfissional = "https://codecream.larissagazoli45.workers.dev/api/web/funcionarios/profissional";
+const urlAPIFuncionariosGeral = "https://codecream.larissagazoli45.workers.dev/api/web/funcionarios";
 
 let listaFuncionarios = [];
 
@@ -33,19 +63,30 @@ function traduzir(dicionario, valor) {
     return valor;
 }
 
+// Verifica de forma segura se o funcionário está ativo ou se já foi demitido
+function verificarSeAtivo(func) {
+    const temDemissao = Boolean(
+        (func.data_demissao && String(func.data_demissao).trim() !== "") ||
+        (func.tipo_demissao !== null && func.tipo_demissao !== undefined && func.tipo_demissao !== "") ||
+        (func.motivo_demissao && String(func.motivo_demissao).trim() !== "")
+    );
+    if (temDemissao) return false;
+    if (func.status === 0 || func.status === '0' || func.status === false || String(func.status).toLowerCase() === 'inativo') {
+        return false;
+    }
+    return true;
+}
+
 // Preenche inputs corretamente convertendo Boolean e Numéricos para o formato HTML
 function preencherCampo(id, valor) {
     const el = document.getElementById(id);
     if (!el) return;
-
     if (valor === null || valor === undefined || valor === "") {
         el.value = "";
         return;
     }
-
     let valConvertido = valor;
     if (typeof valor === "boolean") valConvertido = valor ? "1" : "0";
-
     if (el.tagName === 'SELECT') {
         el.value = valConvertido.toString();
     } else if (el.type === 'date') {
@@ -61,7 +102,27 @@ function preencherCampo(id, valor) {
 document.addEventListener("DOMContentLoaded", function() {
     carregarFuncionarios();
     const form = document.getElementById('form-funcionario');
-    if(form) form.addEventListener('submit', window.salvarFuncionario);
+    if (form) form.addEventListener('submit', window.salvarFuncionario);
+
+    // Muda automaticamente o select de Status para "Inativo" (0) ao preencher dados de demissão
+    const inputDataDemissao = document.getElementById('f-data_demissao');
+    const selectTipoDemissao = document.getElementById('f-tipo_demissao');
+    const inputMotivoDemissao = document.getElementById('f-motivo_demissao');
+    const selectStatus = document.getElementById('f-status');
+
+    function atualizarStatusAutomatico() {
+        if (!selectStatus) return;
+        const temDemissao = (inputDataDemissao && inputDataDemissao.value !== "") ||
+                            (selectTipoDemissao && selectTipoDemissao.value !== "") ||
+                            (inputMotivoDemissao && inputMotivoDemissao.value.trim() !== "");
+        if (temDemissao) {
+            selectStatus.value = "0";
+        }
+    }
+
+    if (inputDataDemissao) inputDataDemissao.addEventListener('change', atualizarStatusAutomatico);
+    if (selectTipoDemissao) selectTipoDemissao.addEventListener('change', atualizarStatusAutomatico);
+    if (inputMotivoDemissao) inputMotivoDemissao.addEventListener('input', atualizarStatusAutomatico);
 
     const inputPesquisa = document.getElementById('inputPesquisa');
     if (inputPesquisa) {
@@ -82,26 +143,23 @@ document.addEventListener("DOMContentLoaded", function() {
 async function carregarFuncionarios() {
     const tbody = document.getElementById('tabela-funcionarios');
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Carregando funcionários...</td></tr>';
-
     try {
+        // cache: 'no-store' garante que o navegador não mostre dados antigos após editar
         const [resPessoal, resProfissional] = await Promise.all([
-            fetch(urlAPIPessoal),
-            fetch(urlAPIProfissional)
+            fetch(urlAPIPessoal, { cache: 'no-store' }),
+            fetch(urlAPIProfissional, { cache: 'no-store' })
         ]);
-
         if (!resPessoal.ok || !resProfissional.ok) throw new Error("Erro nas rotas de GET");
-
         const dadosPessoal = await resPessoal.json();
         const dadosProfissional = await resProfissional.json();
 
         listaFuncionarios = dadosPessoal.map(funcPessoal => {
-            const funcProfissional = dadosProfissional.find(p => p.id_funcionario === funcPessoal.id) || {};
+            const funcProfissional = dadosProfissional.find(p => Number(p.id_funcionario) === Number(funcPessoal.id)) || {};
             return { ...funcProfissional, ...funcPessoal, id: funcPessoal.id };
         });
-        
+                 
         renderizarTabela(listaFuncionarios);
         preencherSelectGestores(listaFuncionarios);
-
     } catch (erro) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--chart-rosa);">Erro ao conectar com a API. Verifique o console.</td></tr>';
     }
@@ -113,26 +171,26 @@ async function carregarFuncionarios() {
 function renderizarTabela(funcionarios) {
     const tbody = document.getElementById('tabela-funcionarios');
     tbody.innerHTML = '';
-    
-    if(funcionarios.length === 0) {
+         
+    if (funcionarios.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum funcionário encontrado.</td></tr>';
         return;
     }
-
     funcionarios.forEach(func => {
         const tipoContrato = traduzir(DICIONARIOS.tipo_contrato, func.tipo);
-        const statusBadge = (func.status == 1 || func.status === 'Ativo' || func.status === true) ? '<span class="status-badge status-good">Ativo</span>' : '<span class="status-badge status-critical">Inativo</span>';
-        
+        const isAtivo = verificarSeAtivo(func);
+        const statusBadge = isAtivo 
+            ? '<span class="status-badge status-good">Ativo</span>' 
+            : '<span class="status-badge status-critical">Inativo</span>';
+                 
         // --- 1. LINHA PRINCIPAL ---
         const trPrincipal = document.createElement('tr');
-        trPrincipal.className = "linha-produto"; // Reaproveitando o CSS do Estoque (cursor pointer)
+        trPrincipal.className = "linha-produto";
         trPrincipal.onclick = (event) => {
-            // Só abre a sanfona se não clicar no Nome (que abre outra tela) nem no botão Editar
             if (!event.target.classList.contains('clickable-name') && !event.target.classList.contains('btn-action')) {
                 toggleDetalhesUsuario(func.id);
             }
         };
-
         trPrincipal.innerHTML = `
             <td><span class="clickable-name" onclick="abrirPaginaDetalhes(${func.id})">${func.nome_completo || '-'}</span></td>
             <td class="col-desktop">${tipoContrato}</td>
@@ -174,7 +232,7 @@ function renderizarTabela(funcionarios) {
 window.toggleDetalhesUsuario = function(id) {
     const linha = document.getElementById(`detalhes-user-${id}`);
     const seta = document.getElementById(`seta-user-${id}`);
-    
+         
     if (linha && seta) {
         linha.classList.toggle('open');
         seta.classList.toggle('ativa');
@@ -187,11 +245,10 @@ window.toggleDetalhesUsuario = function(id) {
 function preencherSelectGestores(funcionarios) {
     const selectGestor = document.getElementById('f-gestor');
     if (!selectGestor) return;
-    
+         
     selectGestor.innerHTML = '<option value="">Nenhum / Selecione</option>';
-    
+         
     funcionarios.forEach(func => {
-        // Verifica se tem nome E se o nível de senioridade é 5 (Gestão)
         if (func.nome_completo && (func.nivel_senioridade == 5 || func.nivel_senioridade === '5')) {
             selectGestor.innerHTML += `<option value="${func.id}">${func.nome_completo}</option>`;
         }
@@ -202,18 +259,17 @@ function preencherSelectGestores(funcionarios) {
 // 4. PÁGINA DE DETALHES (SPA TRADUZIDA)
 // ==========================================
 window.abrirPaginaDetalhes = function(id) {
-    const func = listaFuncionarios.find(f => f.id === id);
+    const func = listaFuncionarios.find(f => Number(f.id) === Number(id));
     if (!func) return;
-
     document.getElementById('tela-lista').style.display = 'none';
     document.getElementById('tela-detalhes').style.display = 'block';
-    
+         
     document.getElementById('detalhe-nome-titulo').innerText = func.nome_completo || "Nome do Funcionário";
     document.getElementById('detalhe-cargo-titulo').innerText = (func.cargo || 'Cargo Indefinido') + (func.setor ? ` | ${func.setor}` : '');
-
     const renderItem = (label, valor) => `
         <div class="info-item"><span class="label">${label}</span><span class="valor">${valor || '-'}</span></div>
     `;
+    const isAtivo = verificarSeAtivo(func);
 
     document.getElementById('box-pessoal-grid').innerHTML = `
         ${renderItem('CPF', func.cpf)}
@@ -230,20 +286,18 @@ window.abrirPaginaDetalhes = function(id) {
         ${renderItem('PCD', traduzir(DICIONARIOS.pcd, func.pcd))}
         ${renderItem('Escolaridade', traduzir(DICIONARIOS.escolaridade, func.escolaridade))}
         ${renderItem('Formação', func.formacao_academica)}
-        ${renderItem('Endereço', func.logradouro + (func.numero ? `, ${func.numero}` : ''))}
+        ${renderItem('Endereço', (func.logradouro || '') + (func.numero ? `, ${func.numero}` : ''))}
         ${renderItem('Bairro', func.bairro)}
         ${renderItem('Cidade', func.cidade)}
         ${renderItem('CEP', func.cep)}
         ${renderItem('Complemento', func.complemento)}
-        ${renderItem('Status', (func.status == 1 || func.status === 'Ativo' || func.status === true) ? 'Ativo' : 'Inativo')}
+        ${renderItem('Status', isAtivo ? 'Ativo' : 'Inativo')}
     `;
-
     let nomeGestor = '-';
     if (func.gestor) {
-        const gestorObj = listaFuncionarios.find(f => f.id == func.gestor);
+        const gestorObj = listaFuncionarios.find(f => Number(f.id) === Number(func.gestor));
         if (gestorObj) nomeGestor = gestorObj.nome_completo;
     }
-
     document.getElementById('box-profissional-grid').innerHTML = `
         ${renderItem('Data Admissão', func.data_admissao ? String(func.data_admissao).split('T')[0] : '')}
         ${renderItem('Tipo Contrato', traduzir(DICIONARIOS.tipo_contrato, func.tipo))}
@@ -282,12 +336,11 @@ window.abrirModalNovo = function() {
 };
 
 window.abrirModalEditar = function(id) {
-    const func = listaFuncionarios.find(f => f.id === id);
+    const func = listaFuncionarios.find(f => Number(f.id) === Number(id));
     if (!func) return;
-
     document.getElementById('modal-titulo').innerText = "Editar Funcionário";
     document.getElementById('func-id').value = func.id;
-    
+         
     const mapeamento = [
         ['f-nome_completo', 'nome_completo'], ['f-data_nascimento', 'data_nascimento'], 
         ['f-genero', 'genero'], ['f-raca', 'raca'], ['f-estado_civil', 'estado_civil'], 
@@ -306,14 +359,11 @@ window.abrirModalEditar = function(id) {
         ['f-chave_pix', 'chave_pix'], ['f-data_demissao', 'data_demissao'], 
         ['f-tipo_demissao', 'tipo_demissao'], ['f-motivo_demissao', 'motivo_demissao']
     ];
-
     mapeamento.forEach(([idInput, campoBD]) => {
         preencherCampo(idInput, func[campoBD]);
     });
-
     const statusSelect = document.getElementById('f-status');
-    if (statusSelect) statusSelect.value = (func.status == 1 || func.status === 'Ativo' || func.status === true) ? '1' : '0';
-
+    if (statusSelect) statusSelect.value = verificarSeAtivo(func) ? '1' : '0';
     document.getElementById('modal-funcionario').classList.add('active');
 };
 
@@ -326,12 +376,21 @@ window.fecharModalForm = function() {
 // ==========================================
 window.salvarFuncionario = async function(event) {
     event.preventDefault(); 
-
     const id = document.getElementById('func-id').value;
     const isNovo = (id === ""); 
 
-    const parseNum = (val) => (!val || val === "") ? null : Number(val);
+    // CORRIGIDO: Não trata 0 como vazio
+    const parseNum = (val) => (val === null || val === undefined || String(val).trim() === "") ? null : Number(val);
     const parseText = (val) => (!val || val.trim() === "") ? null : val.trim();
+
+    const dataDemissao = parseText(document.getElementById('f-data_demissao').value);
+    const tipoDemissao = parseNum(document.getElementById('f-tipo_demissao').value);
+    const motivoDemissao = parseText(document.getElementById('f-motivo_demissao').value);
+
+    // Se preencheu qualquer campo de demissão, o status vai como 0 (Inativo) automaticamente
+    const foiDemitido = Boolean(dataDemissao || tipoDemissao !== null || motivoDemissao);
+    const statusEscolhido = parseNum(document.getElementById('f-status').value);
+    const statusFinal = foiDemitido ? 0 : (statusEscolhido === 0 ? 0 : 1);
 
     const dados = {
         nome_completo: document.getElementById('f-nome_completo').value,
@@ -355,8 +414,7 @@ window.salvarFuncionario = async function(event) {
         complemento: parseText(document.getElementById('f-complemento').value),
         bairro: parseText(document.getElementById('f-bairro').value),
         cidade: parseText(document.getElementById('f-cidade').value),
-        status: parseNum(document.getElementById('f-status').value),
-
+        status: statusFinal,
         data_admissao: parseText(document.getElementById('f-data_admissao').value),
         tipo: parseNum(document.getElementById('f-tipo_contrato').value),
         cargo: parseText(document.getElementById('f-cargo').value),
@@ -372,15 +430,14 @@ window.salvarFuncionario = async function(event) {
         banco: parseText(document.getElementById('f-banco').value),
         agencia: parseNum(document.getElementById('f-agencia').value),
         chave_pix: parseText(document.getElementById('f-chave_pix').value),
-        data_demissao: parseText(document.getElementById('f-data_demissao').value),
-        tipo_demissao: parseNum(document.getElementById('f-tipo_demissao').value),
-        motivo_demissao: parseText(document.getElementById('f-motivo_demissao').value)
+        data_demissao: dataDemissao,
+        tipo_demissao: tipoDemissao,
+        motivo_demissao: motivoDemissao
     };
 
     try {
         const url = isNovo ? urlAPIFuncionariosGeral : `${urlAPIFuncionariosGeral}/${id}`;
         const metodo = isNovo ? 'POST' : 'PUT';
-
         const btn = event.submitter;
         const textoOriginal = btn.innerText;
         btn.innerText = "Salvando...";
@@ -394,16 +451,19 @@ window.salvarFuncionario = async function(event) {
 
         if (resposta.ok) {
             fecharModalForm();
-            carregarFuncionarios(); 
+            await carregarFuncionarios();
+            if (document.getElementById('tela-detalhes').style.display === 'block' && !isNovo) {
+                abrirPaginaDetalhes(Number(id));
+            }
+            mostrarAviso(isNovo ? "Funcionário cadastrado com sucesso!" : "Dados do funcionário atualizados!", "sucesso");
         } else {
             const erroMsg = await resposta.json();
-            alert("Erro ao salvar no banco: " + (erroMsg.error || "Erro Desconhecido"));
+            mostrarAviso("Erro ao salvar no banco: " + (erroMsg.error || "Erro Desconhecido"), "erro");
         }
-        
+                          
         btn.innerText = textoOriginal;
         btn.disabled = false;
-
     } catch (erro) {
-        alert("Erro fatal de conexão com a API.");
+        mostrarAviso("Erro fatal de conexão com a API.", "erro");
     }
 };

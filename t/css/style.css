@@ -877,3 +877,302 @@ th, td {
     color: var(--text-claro);
     text-shadow: 0 0 10px rgba(104, 187, 186, 0.8); 
 }
+/* ==========================================
+   PAGINAÇÃO DO ESTOQUE (LIQUID GLASS)
+   ========================================== */
+.pagination-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.pagination-info {
+    font-size: 12px;
+    color: var(--text-claro);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, var(--glass-inicio), var(--glass-fim));
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 
+        0 8px 32px rgba(42, 17, 67, 0.15),
+        inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.9),
+        inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.page-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-divisoria);
+    background-color: var(--bg-pesquisa);
+    color: var(--text-secundario);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+    background-color: var(--bg-badge);
+    border-color: var(--btn-acao);
+    color: var(--text-escuro);
+    transform: translateY(-2px);
+}
+
+.page-btn.active {
+    background-color: var(--btn-acao);
+    color: var(--text-claro);
+    border-color: var(--btn-acao);
+    box-shadow: 0 4px 12px rgba(164, 95, 206, 0.45);
+    cursor: default;
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.page-dots {
+    color: var(--text-secundario);
+    font-weight: bold;
+    padding: 0 4px;
+    user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+    .pagination-controls {
+        padding: 6px 10px;
+        gap: 4px;
+        width: 100%;
+    }
+    .page-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+}
+
+/* ==========================================
+   SISTEMA DE NOTIFICAÇÕES (TOASTS) & CONFIRM GLASS
+   ========================================== */
+.tpace-toast-container {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+    width: calc(100% - 50px);
+    pointer-events: none;
+}
+
+.tpace-toast {
+    pointer-events: auto;
+    background: linear-gradient(135deg, var(--glass-inicio), var(--glass-fim)) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-left: 5px solid var(--btn-acao) !important;
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: var(--text-escuro);
+    box-shadow: 0 10px 30px rgba(42, 17, 67, 0.28), inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: toastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+    transition: all 0.3s ease;
+}
+
+.tpace-toast.toast-sucesso {
+    border-left-color: var(--chart-turquesa) !important;
+}
+
+.tpace-toast.toast-erro {
+    border-left-color: var(--btn-acao) !important;
+}
+
+.tpace-toast.toast-aviso {
+    border-left-color: var(--chart-rosa) !important;
+}
+
+.tpace-toast-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    flex-shrink: 0;
+    color: #fff;
+    background: var(--btn-acao);
+}
+
+.tpace-toast.toast-sucesso .tpace-toast-icon {
+    background: var(--chart-turquesa);
+}
+
+.tpace-toast.toast-aviso .tpace-toast-icon {
+    background: var(--chart-rosa);
+}
+
+.tpace-toast-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tpace-toast-title {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secundario);
+}
+
+.tpace-toast-msg {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-escuro);
+    line-height: 1.35;
+    white-space: normal;
+}
+
+.tpace-toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secundario);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.2s;
+    padding: 0 4px;
+}
+
+.tpace-toast-close:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(60px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toastFadeOut {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to { opacity: 0; transform: translateX(60px) scale(0.95); }
+}
+
+/* Modal de Confirmação Pequeno (Substituto do confirm nativo) */
+.tpace-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(42, 17, 67, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    padding: 20px;
+}
+
+.tpace-confirm-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tpace-confirm-box {
+    background: linear-gradient(135deg, var(--glass-inicio), var(--glass-fim)) !important;
+    backdrop-filter: blur(24px) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 16px;
+    padding: 25px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    color: var(--text-escuro);
+    box-shadow: 0 12px 35px rgba(42, 17, 67, 0.35), inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.9);
+    transform: scale(0.9);
+    transition: transform 0.25s ease;
+}
+
+.tpace-confirm-overlay.active .tpace-confirm-box {
+    transform: scale(1);
+}
+
+.tpace-confirm-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bg-badge);
+    border: 1px solid var(--border-badge);
+    color: var(--btn-acao);
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+}
+
+.tpace-confirm-title {
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--btn-acao);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.tpace-confirm-text {
+    font-size: 14px;
+    color: var(--text-escuro);
+    margin-bottom: 22px;
+    line-height: 1.4;
+}
+
+.tpace-confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.tpace-confirm-actions .btn {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
