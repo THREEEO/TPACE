@@ -1,11 +1,352 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="icon" type="image/x-icon" href="../t/assets/icons/icone.ico">
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=https://drive.google.com/uc?export=download&id=1_kJw8Yo82OEOLKxG703YMPt7V0emA0q8">
-    <title>Redirecionando...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download - T-PACE</title>
+    <style>
+        /* --- RESET E VARIÁVEIS (PALETA OFICIAL T-PACE) --- */
+        :root {
+            --bg-topo: #5E3A7D;
+            --bg-base: #2A1143;
+            --glass-inicio: #F8F3FCE6;
+            --glass-fim: #F8F3FCCC;
+            --bg-pesquisa: #F8F3FC99;
+            --bg-badge: #A45FCE1A;
+
+            /* Bordas e Sombras */
+            --border-glass: rgba(255, 255, 255, 0.6);
+            --border-divisoria: #D6C4E866;
+            --border-badge: #A45FCE44;
+            --sombra-escura: #2A1143;
+
+            /* Destaques e Botões */
+            --btn-acao: #A45FCE;
+            --chart-turquesa: #68BBBA;
+            --chart-rosa: #F25C8F;
+
+            /* Textos e Tipografia */
+            --text-escuro: #2A1143;
+            --text-secundario: #5E3A7D;
+            --text-claro: #F8F3FC;
+            --text-rodape: #D6C4E8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-claro);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
+            position: relative;
+        }
+
+        /* As Formas Flutuantes (Blobs) */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.6;
+            border-radius: 50%;
+            animation: flutuar 15s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 450px;
+            height: 450px;
+            background-color: var(--btn-acao);
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            bottom: -20%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background-color: var(--chart-turquesa);
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 40%;
+            width: 300px;
+            height: 300px;
+            background-color: var(--chart-rosa);
+            animation-delay: -10s;
+            animation-duration: 20s;
+        }
+
+        @keyframes flutuar {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(150px, 100px) scale(1.2);
+            }
+            66% {
+                transform: translate(-100px, 200px) scale(0.8);
+            }
+            100% {
+                transform: translate(50px, -50px) scale(1.1);
+            }
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .download-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100vw;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Cartão Liquid Glass */
+        .download-glass-card {
+            background: linear-gradient(135deg, var(--glass-inicio), var(--glass-fim));
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 8px 32px rgba(42, 17, 67, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            animation: cardEntrada 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes cardEntrada {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .download-header {
+            margin-bottom: 24px;
+        }
+
+        .download-header h1 {
+            font-size: 32px;
+            color: var(--btn-acao);
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .download-header p {
+            color: var(--text-secundario);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Badge e Informações do Instalador */
+        .file-info-box {
+            background-color: var(--bg-pesquisa);
+            border: 1px solid var(--border-divisoria);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .version-badge {
+            background-color: var(--bg-badge);
+            color: var(--text-secundario);
+            border: 1px solid var(--border-badge);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .file-name {
+            color: var(--text-escuro);
+            font-size: 15px;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .file-meta {
+            color: var(--text-secundario);
+            font-size: 12px;
+        }
+
+        .status-text {
+            color: var(--text-secundario);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Botão de Download */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: var(--btn-acao);
+            color: var(--text-claro);
+            text-decoration: none;
+            border: none;
+            width: 100%;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(42, 17, 67, 0.3);
+        }
+
+        .btn:hover {
+            background-color: var(--bg-topo);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(42, 17, 67, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Rodapé */
+        .login-footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-rodape);
+            left: 0;
+        }
+
+        .login-footer a {
+            color: var(--chart-rosa);
+            font-weight: bold;
+            text-decoration: none;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .login-footer a:hover {
+            color: var(--text-claro);
+            text-shadow: 0 0 10px rgba(104, 187, 186, 0.8);
+        }
+
+        /* Responsividade Mobile */
+        @media screen and (max-width: 768px) {
+            .download-glass-card {
+                padding: 25px 20px;
+                max-width: 92%;
+            }
+
+            .download-header {
+                margin-bottom: 18px;
+            }
+
+            .download-header h1 {
+                font-size: 26px;
+            }
+
+            .download-header p {
+                font-size: 12px;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Se você não for redirecionado automaticamente, <a href="https://drive.google.com/uc?export=download&id=1_kJw8Yo82OEOLKxG703YMPt7V0emA0q8">clique aqui</a>.</p>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="download-container">
+        <div class="download-glass-card">
+            <div class="download-header">
+                <h1>T-PACE</h1>
+                <p>Instalador do Sistema para Windows</p>
+            </div>
+
+            <div class="file-info-box">
+                <span class="version-badge">Versão 1.3.8</span>
+                <span class="file-name">Instalador_T-PACE_v1.3.8.exe</span>
+                <span class="file-meta">Executável Windows (.exe) &bull; ~45,5 MB</span>
+            </div>
+
+            <p id="status-msg" class="status-text">
+                O seu download começará automaticamente em instantes.<br>
+                Caso não inicie, clique no botão abaixo:
+            </p>
+
+            <a id="btn-download" href="Instalador_T-PACE_v1.3.8.exe" download="Instalador_T-PACE_v1.3.8.exe" class="btn">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
+                </svg>
+                BAIXAR INSTALADOR
+            </a>
+        </div>
+
+        <footer class="login-footer">
+            <p>Desenvolvido por <a href="https://threeeo.com.br" target="_blank">Threeeo</a></p>
+        </footer>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = 'Instalador_T-PACE_v1.3.8.exe';
+                link.setAttribute('download', 'Instalador_T-PACE_v1.3.8.exe');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, 600);
+        });
+    </script>
 </body>
 </html>
